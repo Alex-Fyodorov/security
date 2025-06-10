@@ -1,11 +1,11 @@
 package com.globus.session_tracing.entities;
 
 import jakarta.persistence.*;
+import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @Table(name = "security_logs")
-public class SecurityLog {
+public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +29,7 @@ public class SecurityLog {
     private LocalDateTime loginTime;
 
     @Column(name = "logout_time")
-    @UpdateTimestamp
+    @Timestamp
     private LocalDateTime logoutTime;
 
     @Column(name = "method")
@@ -42,5 +42,5 @@ public class SecurityLog {
     private String deviceInfo;
 
     @Column(name = "is_active")
-    private boolean isActive;
+    private Boolean isActive;
 }
