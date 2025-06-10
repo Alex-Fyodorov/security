@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html ng-app="androidEmulator">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.11/ngStorage.min.js"></script>
+    <script src="index.js"></script>
+</head>
+<body>
+<div class="container container-md" ng-controller="emulatorController">
+    <br/>
+    <h3>Biometric Android Emulator</h3>
+    <br/>
+    <h5>Регистрация</h5>
+    <br/>
+    <form novalidate class="row g-3" ng-submit="registration()">
+        <div class="col-auto">
+            <input class="form-control" type="number" placeholder="User Id" ng-model="registrationRequest.userId">
+        </div>
+        <div class="col-auto">
+            <input class="form-control" type="text" placeholder="Device Info" ng-model="registrationRequest.deviceInfo">
+        </div>
+        <div class="col-auto">
+            <input class="form-control" type="text" placeholder="Phone Number" ng-model="registrationRequest.phoneNumber">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Регистрация</button>
+        </div>
+    </form>
+    <br/>
+    <form novalidate class="row g-3" ng-submit="smsCode()">
+        <div class="col-auto">
+            <input class="form-control" type="number" placeholder="SMS Code" ng-model="registrationRequest.otp">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Отправить СМС-код</button>
+        </div>
+    </form>
+    <br/>
+    <h5>Вход</h5>
+    <br/>
+    <form novalidate class="row g-3" ng-submit="auth()">
+        <div class="col-auto">
+            <input class="form-control" type="number" placeholder="User Id" ng-model="authRequest.userId">
+        </div>
+        <div class="col-auto">
+            <input class="form-control" type="text" placeholder="Device Info" ng-model="authRequest.deviceInfo">
+        </div>
+        <div class="col-auto">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="radio1" ng-model="authRequest.authenticated" value="true">
+                <label class="form-check-label" for="radio1">
+                    True Auth
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="radio2" checked ng-model="authRequest.authenticated" value="false">
+                <label class="form-check-label" for="radio2">
+                    False Auth
+                </label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Аутентификация</button>
+        </div>
+    </form>
+    <br/>
+    <h5>Получение пользовательских данных по user_id</h5>
+    <br/>
+    <form novalidate class="row g-3" ng-submit="checkUser()">
+        <div class="col-auto">
+            <input class="form-control" type="number" placeholder="User Id" ng-model="userId">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Запрос</button>
+        </div>
+    </form>
+    <br/>
+    <h5>Включение/выключение биометрии на устройстве</h5>
+    <br/>
+    <form novalidate class="row g-3" ng-submit="changeDeviceStatus()">
+        <div class="col-auto">
+            <input class="form-control" type="number" placeholder="User Id" ng-model="changeStatus.userId">
+        </div>
+        <div class="col-auto">
+            <input class="form-control" type="text" placeholder="Device Info" ng-model="changeStatus.deviceInfo">
+        </div>
+        <div class="col-auto">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="radio3" ng-model="changeStatus.enabled" value="true">
+                <label class="form-check-label" for="radio3">
+                    On
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="radio4" checked ng-model="changeStatus.enabled" value="false">
+                <label class="form-check-label" for="radio4">
+                    Off
+                </label>
+            </div>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Выполнить</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
