@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: session-tracing-postgres
+    image: postgres:13
+    domainname: postgres
+    #    restart: always
+    environment:
+      POSTGRES_DB: session_tracing_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+
+
+  flyway:
+    container_name: session-tracing-flyway
+    image: boxfuse/flyway
+    command: -url=jdbc:postgresql://postgres:5432/session_tracing_service?verifyServerCertificate=false&useSSL=true -user=postgres -password=postgres -connectRetries=30 migrate
+    volumes:
+      - ./flyway:/flyway/sql
+    depends_on:
+      - postgres
+
+  redis:
+    container_name: session-tracing-redis
+    image: bitnami/redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6380:6379"
