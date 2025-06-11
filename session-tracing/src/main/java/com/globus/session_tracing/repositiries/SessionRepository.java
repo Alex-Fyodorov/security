@@ -9,11 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SessionRepository extends JpaRepository<Session, Integer>,
+public interface SessionRepository extends JpaRepository<Session, Long>,
         JpaSpecificationExecutor<Session> {
 
     @Transactional
     @Modifying
     @Query("update Session s set s.isActive = false, s.logoutTime = current_timestamp where s.id = :sessionId")
-    void logout (Integer sessionId);
+    void logout (Long sessionId);
 }

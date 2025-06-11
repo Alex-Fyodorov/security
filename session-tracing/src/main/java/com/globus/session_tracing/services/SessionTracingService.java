@@ -1,6 +1,7 @@
 package com.globus.session_tracing.services;
 
 import com.globus.session_tracing.entities.Session;
+import com.globus.session_tracing.exceptions.SessionNotFoundException;
 import com.globus.session_tracing.repositiries.SessionRepository;
 import com.globus.session_tracing.repositiries.specifications.SessionSpecification;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,13 @@ public class SessionTracingService {
             specification = specification.and(SessionSpecification.activityEqualTo(isActive));
         }
         if (page < 1) page = 1;
-        return sessionRepository.findAll(specification, PageRequest.of(page - 1, SESSIONS_IN_PAGE, Sort.by(sort)));
+        return sessionRepository.findAll(specification, PageRequest.of(page - 1,
+                SESSIONS_IN_PAGE, Sort.by(sort)));
+    }
+
+    public Session findBySessionId(long id) {
+        return sessionRepository.findById(id).orElseThrow(() -> new SessionNotFoundException(
+                String.format("Session with id = %d not found.", id)));
     }
 
     public Session save(Session log) {
@@ -42,12 +49,7 @@ public class SessionTracingService {
         return sessionRepository.save(log);
     }
 
-    public void logout(int id) {
+    public void logout(long id) {
         sessionRepository.logout(id);
-    }
-
-
-    public Session read(int id) {
-        return sessionRepository.findById(id).get();
     }
 }

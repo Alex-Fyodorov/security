@@ -24,13 +24,13 @@ public class SessionTracingController {
     }
 
     @GetMapping("/logout/{id}")
-    public void logout(@PathVariable int id) {
+    public void logout(@PathVariable long id) {
         sessionTracingService.logout(id);
     }
 
-    @GetMapping("/read/{id}")
-    public Session read(@PathVariable int id) {
-        return sessionTracingService.read(id);
+    @GetMapping("/{id}")
+    public Session read(@PathVariable long id) {
+        return sessionTracingService.findBySessionId(id);
     }
 
     @GetMapping

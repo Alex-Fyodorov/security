@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class SessionDto {
 
     @Schema(description = "ID записи", example = "1")
-    private Integer id;
+    private Long id;
     @Schema(description = "ID пользователя", example = "1")
     private Integer userId;
     @Schema(description = "Дата и время входа пользователя в аккаунт", example = "2025-06-10T18:15:39.697528")
