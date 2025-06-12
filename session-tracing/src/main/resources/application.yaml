@@ -11,7 +11,7 @@ spring:
   data:
     redis:
       host: localhost
-      port: 6380
+      port: 6387
 
   jpa:
     open-in-view: true
@@ -21,6 +21,3 @@ spring:
         ddl-auto: update
         format_sql: true
 #    database-platform: org.hibernate.dialect.PostgreSQLDialect
-
-  liquibase:
-    enabled: true

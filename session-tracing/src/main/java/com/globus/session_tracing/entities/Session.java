@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @AllArgsConstructor
@@ -28,11 +29,11 @@ public class Session {
 
     @Column(name = "login_time")
     @CreationTimestamp
-    private LocalDateTime loginTime;
+    private Date loginTime;
 
     @Column(name = "logout_time")
     @Timestamp
-    private LocalDateTime logoutTime;
+    private Date logoutTime;
 
     @Column(name = "method")
     private String method;

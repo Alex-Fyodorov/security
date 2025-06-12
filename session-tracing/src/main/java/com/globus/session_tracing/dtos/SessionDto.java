@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,9 +21,9 @@ public class SessionDto {
     @Schema(description = "ID пользователя", example = "1")
     private Integer userId;
     @Schema(description = "Дата и время входа пользователя в аккаунт", example = "2025-06-10T18:15:39.697528")
-    private LocalDateTime loginTime;
+    private Date loginTime;
     @Schema(description = "Дата и время выхода пользователя из аккаунта", example = "2025-06-10T19:17:39.697528")
-    private LocalDateTime logoutTime;
+    private Date logoutTime;
     @Schema(description = "Метод входа", example = "?")
     private String method;
     @Schema(description = "Маскированный ip-адрес", example = "192.168.***.**1")

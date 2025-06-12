@@ -18,21 +18,6 @@ public class SessionTracingController {
     private final SessionTracingService sessionTracingService;
     private final SessionConverter sessionConverter;
 
-    @PostMapping
-    public Session save(@RequestBody Session log) {
-        return sessionTracingService.save(log);
-    }
-
-    @GetMapping("/logout/{id}")
-    public void logout(@PathVariable long id) {
-        sessionTracingService.logout(id);
-    }
-
-    @GetMapping("/{id}")
-    public Session read(@PathVariable long id) {
-        return sessionTracingService.findBySessionId(id);
-    }
-
     @GetMapping
     public Page<SessionDto> findAll(
             @RequestParam(required = false, name = "user_id") @Parameter(
@@ -49,6 +34,26 @@ public class SessionTracingController {
                     "Сортировка сессий по id, id пользователя, времени входа или методу") String sort) {
         return sessionTracingService.findAll(userId, minLoginTime, method, isActive, page, sort)
                 .map(sessionConverter::toDto);
+    }
+
+    @GetMapping("/{id}")
+    public Session read(@PathVariable long id) {
+        return sessionTracingService.findBySessionId(id);
+    }
+
+    @GetMapping("/redis/{id}")
+    public Session readFromRedis(@PathVariable long id) {
+        return sessionTracingService.findFromRedis(id);
+    }
+
+    @PostMapping
+    public Session create(@RequestBody Session log) {
+        return sessionTracingService.save(log);
+    }
+
+    @GetMapping("/logout/{id}")
+    public void logout(@PathVariable long id) {
+        sessionTracingService.logout(id);
     }
 }
 
