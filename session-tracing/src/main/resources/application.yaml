@@ -21,3 +21,7 @@ spring:
         ddl-auto: update
         format_sql: true
 #    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+task:
+  cron:
+    value: 0 * * * * ?

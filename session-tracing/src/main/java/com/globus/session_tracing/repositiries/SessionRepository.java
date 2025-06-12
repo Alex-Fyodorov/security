@@ -16,4 +16,7 @@ public interface SessionRepository extends JpaRepository<Session, Long>,
     @Modifying
     @Query("update Session s set s.isActive = false, s.logoutTime = current_timestamp where s.id = :sessionId")
     void logout (Long sessionId);
+
+    @Query("select count(s.id) from Session s where s.userId = :userId and isActive = true")
+    int sessionCount(int userId);
 }

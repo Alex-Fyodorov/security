@@ -2,22 +2,27 @@ package com.globus.session_tracing.services;
 
 import com.globus.session_tracing.entities.Session;
 import com.globus.session_tracing.exceptions.SessionNotFoundException;
+import com.globus.session_tracing.exceptions.TooManySessionsException;
 import com.globus.session_tracing.repositiries.RedisRepository;
 import com.globus.session_tracing.repositiries.SessionRepository;
 import com.globus.session_tracing.repositiries.specifications.SessionSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class SessionTracingService {
     private final static int SESSIONS_IN_PAGE = 50;
+    private final static int SESSIONS_LIFE_DAYS = 183;
     private final SessionRepository sessionRepository;
     private final RedisRepository redisRepository;
 
@@ -47,6 +52,10 @@ public class SessionTracingService {
     }
 
     public Session save(Session session) {
+        int count = sessionRepository.sessionCount(session.getUserId());
+        if (count >= 3) {
+            throw new TooManySessionsException("Открыто слишком много сессий.");
+        }
         session.setId(null);
         session = sessionRepository.save(session);
         if (session.getId() != null) {
@@ -57,10 +66,16 @@ public class SessionTracingService {
 
     public void logout(long id) {
         sessionRepository.logout(id);
+        redisRepository.delete(id);
     }
 
     public Session findFromRedis(long id) {
         return redisRepository.read(id).orElseThrow(() -> new SessionNotFoundException(
                 String.format("Session with id = %d not found.", id)));
+    }
+
+    @Scheduled(cron = "${task.cron.value}")
+    public void deleteOldSessions() {
+        log.info(String.format("Удаление сессий, созданных больше %d дней назад.", SESSIONS_LIFE_DAYS));
     }
 }
