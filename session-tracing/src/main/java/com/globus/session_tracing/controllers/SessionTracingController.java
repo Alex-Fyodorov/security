@@ -33,8 +33,6 @@ public class SessionTracingController {
                     description = "Номер страницы") Integer page,
             @RequestParam(defaultValue = "id", name = "sort") @Parameter(description =
                     "Сортировка сессий по id, id пользователя, времени входа или методу") String sort) {
-        System.out.println("====================================");
-        System.out.println(minLoginTime);
         return sessionTracingService.findAll(userId, minLoginTime, method, isActive, page, sort)
                 .map(sessionConverter::toDto);
     }
@@ -63,6 +61,4 @@ public class SessionTracingController {
 
 // TODO Дописать сваггер в SessionDto
 // TODO Доделать Schedul
-// TODO Доработать фильтрацию по датам
-// TODO Доработать фильтрацию по методу
 // TODO Перевести весь контроллер на ДТО

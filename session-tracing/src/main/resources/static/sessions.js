@@ -21,13 +21,19 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
         });
     };
 
-
-    $scope.loadSessions2 = function () {
-//        let str = $scope.loadSessions.min_login_time;
-//        str = str.substring(0, str.length - 1);
-//        console.log('str1 = ' + str);
-//        $scope.loadSessions.min_login_time = str;
-//        console.log('str2 = ' + $scope.loadSessions.min_login_time);
+    $scope.prepareToLoad = function () {
+        if ($scope.loadSessions.method == "all") {
+            delete $scope.loadSessions.method;
+        }
+        if ($scope.loadSessions.is_active == "all") {
+            delete $scope.loadSessions.is_active;
+        }
+        const date = new Date($scope.minLoginTime);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const time = date.toLocaleTimeString();
+        $scope.loadSessions.min_login_time = `${year}-${month}-${day}T${time}`;
         $scope.loadSessions();
     }
 
@@ -43,6 +49,7 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
     $scope.resetFilter = function () {
         $scope.loadSessions.user_id = null;
         $scope.loadSessions.min_login_time = null;
+        $scope.minLoginTime = null;
         $scope.loadSessions.method = null;
         $scope.loadSessions.is_active = null;
         $scope.loadSessions();

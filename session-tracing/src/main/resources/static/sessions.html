@@ -24,7 +24,7 @@
                 <p></p>
                 <h5>Filter</h5>
                 <p></p>
-                <form novalidate class="align-middle input-group-sm" ng-submit="loadSessions2()" style="padding-400">
+                <form novalidate class="align-middle input-group-sm" ng-submit="prepareToLoad()" style="padding-400">
                     <div class="mb-3 row">
                         <label class="col-form-label form-control-sm">User ID</label>
                         <div class="col-sm">
@@ -35,7 +35,7 @@
                     <div class="mb-3 row">
                         <label class="col-form-label form-control-sm">Date</label>
                         <div class="col-sm">
-                            <input type="datetime-local" class="form-control form-control-sm" ng-model="loadSessions.min_login_time">
+                            <input type="datetime-local" class="form-control form-control-sm" ng-model="minLoginTime">
                         </div>
                     </div>
                     <p></p>
@@ -43,7 +43,7 @@
                         <label class="col-form-label form-control-sm">Login Method</label>
                         <div class="col-sm">
                             <select class="form-control form-control-sm" ng-model="loadSessions.method">
-                                <option>All</option>
+                                <option value="all">All</option>
                                 <option value="password">Password</option>
                                 <option value="biometric">Biometric</option>
                                 <option value="OAuth">OAuth</option>
@@ -55,7 +55,7 @@
                         <label class="col-form-label form-control-sm">Session Activity</label>
                         <div class="col-sm">
                             <select class="form-control form-control-sm" ng-model="loadSessions.is_active">
-                                <option>All</option>
+                                <option value="all">All</option>
                                 <option value="true">Active</option>
                                 <option value="false">Inactive</option>
                             </select>
