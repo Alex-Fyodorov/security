@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/api/v1/sessions")
@@ -23,7 +24,7 @@ public class SessionTracingController {
             @RequestParam(required = false, name = "user_id") @Parameter(
                     description = "Фильтр по id пользователя") Integer userId,
             @RequestParam(required = false, name = "min_login_time") @Parameter(
-                    description = "Фильтр по минимальному времени вхождения в аккаунт")LocalDateTime minLoginTime,
+                    description = "Фильтр по минимальному времени вхождения в аккаунт") LocalDateTime minLoginTime,
             @RequestParam(required = false, name = "method") @Parameter(
                     description = "Фильтр по методу вхождения в аккаунт") String method,
             @RequestParam(required = false, name = "is_active") @Parameter(
@@ -32,6 +33,8 @@ public class SessionTracingController {
                     description = "Номер страницы") Integer page,
             @RequestParam(defaultValue = "id", name = "sort") @Parameter(description =
                     "Сортировка сессий по id, id пользователя, времени входа или методу") String sort) {
+        System.out.println("====================================");
+        System.out.println(minLoginTime);
         return sessionTracingService.findAll(userId, minLoginTime, method, isActive, page, sort)
                 .map(sessionConverter::toDto);
     }
@@ -55,7 +58,10 @@ public class SessionTracingController {
     public void logout(@PathVariable long id) {
         sessionTracingService.logout(id);
     }
+
 }
 
 // TODO Дописать сваггер в SessionDto
 // TODO Доделать Schedul
+// TODO Доработать фильтрацию по датам
+// TODO Сделать блок ввода новых сессий

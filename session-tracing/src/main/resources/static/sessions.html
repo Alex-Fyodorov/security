@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html ng-app="sessionsFront">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+    <script src="sessions.js"></script>
+</head>
+
+<body>
+<div class="container container-md" ng-controller="sessionController">
+    <div class="col-6 col-md-5">
+        <br/>
+        <h3>Session Tracing</h3>
+        <br/>
+
+        <!--Фильтры-->
+        <h5>Filter</h5>
+        <p></p>
+        <form novalidate class="align-middle input-group-sm" ng-submit="loadSessions2()">
+            <input class="form-control" type="number" placeholder="User ID" ng-model="loadSessions.user_id">
+            <p></p>
+            <input class="form-control" type="datetime-local" placeholder="Max Price" ng-model="loadSessions.min_login_time">
+            <p></p>
+            <select class="form-control" ng-model="loadSessions.method">
+                <option selected>Select the login method</option>
+                <option>All</option>
+                <option value="password">Password</option>
+                <option value="biometric">Biometric</option>
+                <option value="OAuth">OAuth</option>
+            </select>
+            <p></p>
+            <select class="form-control" ng-model="loadSessions.is_active">
+                <option selected>Select session activity</option>
+                <option>All</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+            <p></p>
+            <p class="btn-group" role="group">
+                <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" ng-click="reset()">Reset</button>
+            </p>
+        </form>
+
+        <p></p>
+        <p></p>
+        <h5>Sort By</h5>
+        <p></p>
+        <p class="btn-group" role="group">
+            <button class="btn btn-outline-primary btn-sm" ng-click="sort('id')">Id</button>
+            <button class="btn btn-outline-primary btn-sm" ng-click="sort('userId')">User ID</button>
+            <button class="btn btn-outline-primary btn-sm" ng-click="sort('loginTime')">Login Time</button>
+            <button class="btn btn-outline-primary btn-sm" ng-click="sort('method')">Method</button>
+        </p>
+    </div>
+
+    <div class="col-sn-20 col-md-9">
+        <!--Список сессий-->
+        <p></p>
+        <h5>Sessions Page</h5>
+        <table class="table table-hover">
+            <tr>
+                <td>Id</td>
+                <td>User ID</td>
+                <td>Login Time</td>
+                <td>Logout Time</td>
+                <td>Method</td>
+                <td>Device Info</td>
+                <td>IP-Address</td>
+                <td>Active</td>
+            </tr>
+            <tbody>
+            <tr ng-repeat="s in SessionsList">
+                <td>{{s.id}}</td>
+                <td>{{s.userId}}</td>
+                <td>{{s.loginTime}}</td>
+                <td>{{s.logoutTime}}</td>
+                <td>{{s.method}}</td>
+                <td>{{s.deviceInfo}}</td>
+                <td>{{s.ipAddress}}</td>
+                <td>{{s.isActive}}</td>
+                <td>
+                    <button class="btn btn-outline-danger" ng-click="closeSession(s.id)">Close Session</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!--Кнопки страниц-->
+        <p class="btn-group" ng-repeat="n in [].constructor(totalPages) track by $index">
+            <button class="btn btn-outline-info" ng-click="page($index + 1)">{{$index + 1}}</button>
+        </p>
+    </div>
+</div>
+</body>
+</html>

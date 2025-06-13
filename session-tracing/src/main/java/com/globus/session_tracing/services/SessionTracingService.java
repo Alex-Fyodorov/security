@@ -2,6 +2,7 @@ package com.globus.session_tracing.services;
 
 import com.globus.session_tracing.entities.Session;
 import com.globus.session_tracing.exceptions.SessionNotFoundException;
+import com.globus.session_tracing.exceptions.SessionsOperationsException;
 import com.globus.session_tracing.exceptions.TooManySessionsException;
 import com.globus.session_tracing.repositiries.RedisRepository;
 import com.globus.session_tracing.repositiries.SessionRepository;
@@ -16,12 +17,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Optional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SessionTracingService {
-    private final static int SESSIONS_IN_PAGE = 50;
+    private final static int SESSIONS_IN_PAGE = 20;
     private final static int SESSIONS_LIFE_DAYS = 183;
     private final SessionRepository sessionRepository;
     private final RedisRepository redisRepository;
@@ -48,7 +51,7 @@ public class SessionTracingService {
 
     public Session findBySessionId(long id) {
         return sessionRepository.findById(id).orElseThrow(() -> new SessionNotFoundException(
-                String.format("Session with id = %d not found.", id)));
+                String.format("Сессия с id: %d не найдена.", id)));
     }
 
     public Session save(Session session) {
@@ -65,17 +68,27 @@ public class SessionTracingService {
     }
 
     public void logout(long id) {
+        Optional<Session> session = sessionRepository.findById(id);
+        if (session.isEmpty()) {
+            throw new SessionNotFoundException(
+                    String.format("Сессия с id: %d не найдена.", id));
+        }
+        if (!session.get().getIsActive()) {
+            throw new SessionsOperationsException(String.format(
+                    "Невозможно выполнить операцию. Сессия с id: %d закрыта.", id));
+        }
         sessionRepository.logout(id);
         redisRepository.delete(id);
     }
 
     public Session findFromRedis(long id) {
         return redisRepository.read(id).orElseThrow(() -> new SessionNotFoundException(
-                String.format("Session with id = %d not found.", id)));
+                String.format("Сессия с id: %d не найдена.", id)));
     }
 
     @Scheduled(cron = "${task.cron.value}")
     public void deleteOldSessions() {
         log.info(String.format("Удаление сессий, созданных больше %d дней назад.", SESSIONS_LIFE_DAYS));
     }
+
 }

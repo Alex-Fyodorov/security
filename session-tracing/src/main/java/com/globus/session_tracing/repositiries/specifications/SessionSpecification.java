@@ -4,6 +4,7 @@ import com.globus.session_tracing.entities.Session;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 public class SessionSpecification {
 
