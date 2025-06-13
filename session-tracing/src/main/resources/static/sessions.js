@@ -1,7 +1,7 @@
 angular.module('sessionsFront', []).controller('sessionController', function ($scope, $http) {
     const contextPath = 'http://localhost:8337/api/v1/sessions';
 
- //Загрузка списка сессий
+// Загрузка списка сессий
     $scope.loadSessions = function () {
         $http({
             url: contextPath,
@@ -21,6 +21,7 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
         });
     };
 
+// Подготовка к загрузке списка сессий
     $scope.prepareToLoad = function () {
         if ($scope.loadSessions.method == "all") {
             delete $scope.loadSessions.method;
@@ -37,7 +38,14 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
         $scope.loadSessions();
     }
 
-
+    $scope.timeFormat = function (inTime) {
+        const date = new Date(inTime);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const time = date.toLocaleTimeString();
+        return `${time} / ${day}.${month}.${year}`;
+    }
 
 // Переключение страниц
     $scope.page = function (p) {

@@ -129,10 +129,12 @@
         </tbody>
     </table>
 
-    <div class="col-sn-20 col-md-9">
+    <div class="col-sm">
         <!--Список сессий-->
         <p></p>
+        <br/>
         <h5>Sessions Page</h5>
+        <br/>
         <table class="table table-hover">
             <tr>
                 <td>Id</td>
@@ -148,14 +150,15 @@
             <tr ng-repeat="s in SessionsList">
                 <td>{{s.id}}</td>
                 <td>{{s.userId}}</td>
-                <td>{{s.loginTime}}</td>
-                <td>{{s.logoutTime}}</td>
+                <td>{{timeFormat(s.loginTime)}}</td>
+                <td>{{timeFormat(s.logoutTime)}}</td>
                 <td>{{s.method}}</td>
                 <td>{{s.deviceInfo}}</td>
                 <td>{{s.ipAddress}}</td>
                 <td>{{s.isActive}}</td>
                 <td>
-                    <button class="btn btn-outline-danger" ng-click="closeSession(s.id)">Close Session</button>
+                    <button class="btn btn-outline-danger" ng-show="s.isActive" ng-click="closeSession(s.id)">Close Session</button>
+                    <button class="btn btn-outline-secondary" ng-show="!s.isActive">Close Session</button>
                 </td>
             </tr>
             </tbody>
