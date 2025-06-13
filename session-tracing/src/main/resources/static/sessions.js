@@ -40,7 +40,7 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
     };
 
 // Обнуление фильтров
-    $scope.reset = function () {
+    $scope.resetFilter = function () {
         $scope.loadSessions.user_id = null;
         $scope.loadSessions.min_login_time = null;
         $scope.loadSessions.method = null;
@@ -65,6 +65,27 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
                 console.log(response.data);
                 alert(response.data.statusCode + "\n" + response.data.message)
             });
+    };
+
+// Создание новой сесии
+    $scope.createSession = function () {
+        $http.post(contextPath, $scope.newSession)
+            .then(function successCallback(response) {
+                console.log(response.data);
+                $scope.loadSessions();
+            }
+            , function errorCallback(response) {
+                console.log(response.data);
+                alert(response.data.statusCode + "\n" + response.data.message)
+            });
+    };
+
+// Обнуление формы
+    $scope.resetNewSession = function () {
+        $scope.newSession.userId = null;
+        $scope.newSession.deviceInfo = null;
+        $scope.newSession.method = null;
+        $scope.newSession.ipAddress = null;
     };
 
     $scope.loadSessions();

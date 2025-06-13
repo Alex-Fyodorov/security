@@ -11,51 +11,123 @@
 
 <body>
 <div class="container container-md" ng-controller="sessionController">
-    <div class="col-6 col-md-5">
-        <br/>
-        <h3>Session Tracing</h3>
-        <br/>
 
-        <!--Фильтры-->
-        <h5>Filter</h5>
-        <p></p>
-        <form novalidate class="align-middle input-group-sm" ng-submit="loadSessions2()">
-            <input class="form-control" type="number" placeholder="User ID" ng-model="loadSessions.user_id">
-            <p></p>
-            <input class="form-control" type="datetime-local" placeholder="Max Price" ng-model="loadSessions.min_login_time">
-            <p></p>
-            <select class="form-control" ng-model="loadSessions.method">
-                <option selected>Select the login method</option>
-                <option>All</option>
-                <option value="password">Password</option>
-                <option value="biometric">Biometric</option>
-                <option value="OAuth">OAuth</option>
-            </select>
-            <p></p>
-            <select class="form-control" ng-model="loadSessions.is_active">
-                <option selected>Select session activity</option>
-                <option>All</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-            </select>
-            <p></p>
-            <p class="btn-group" role="group">
-                <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
-                <button type="button" class="btn btn-outline-primary btn-sm" ng-click="reset()">Reset</button>
-            </p>
-        </form>
+    <br/>
+    <h2>Session Tracing</h2>
+    <br/>
 
-        <p></p>
-        <p></p>
-        <h5>Sort By</h5>
-        <p></p>
-        <p class="btn-group" role="group">
-            <button class="btn btn-outline-primary btn-sm" ng-click="sort('id')">Id</button>
-            <button class="btn btn-outline-primary btn-sm" ng-click="sort('userId')">User ID</button>
-            <button class="btn btn-outline-primary btn-sm" ng-click="sort('loginTime')">Login Time</button>
-            <button class="btn btn-outline-primary btn-sm" ng-click="sort('method')">Method</button>
-        </p>
-    </div>
+    <table class="table" style="width:100%">
+        <tbody>
+        <tr>
+            <td  style="background-color:powderblue; padding-right:40px; width:50%">
+                <!--Фильтры-->
+                <p></p>
+                <h5>Filter</h5>
+                <p></p>
+                <form novalidate class="align-middle input-group-sm" ng-submit="loadSessions2()" style="padding-400">
+                    <div class="mb-3 row">
+                        <label class="col-form-label form-control-sm">User ID</label>
+                        <div class="col-sm">
+                            <input type="number" class="form-control form-control-sm" ng-model="loadSessions.user_id">
+                        </div>
+                    </div>
+                    <p></p>
+                    <div class="mb-3 row">
+                        <label class="col-form-label form-control-sm">Date</label>
+                        <div class="col-sm">
+                            <input type="datetime-local" class="form-control form-control-sm" ng-model="loadSessions.min_login_time">
+                        </div>
+                    </div>
+                    <p></p>
+                    <div class="mb-3 row">
+                        <label class="col-form-label form-control-sm">Login Method</label>
+                        <div class="col-sm">
+                            <select class="form-control form-control-sm" ng-model="loadSessions.method">
+                                <option>All</option>
+                                <option value="password">Password</option>
+                                <option value="biometric">Biometric</option>
+                                <option value="OAuth">OAuth</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p></p>
+                    <div class="rmb-3 row">
+                        <label class="col-form-label form-control-sm">Session Activity</label>
+                        <div class="col-sm">
+                            <select class="form-control form-control-sm" ng-model="loadSessions.is_active">
+                                <option>All</option>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <br/>
+                    <p></p>
+                    <p class="btn-group" role="group">
+                        <button type="submit" class="btn btn-outline-primary btn-sm">Filter</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" ng-click="resetFilter()">Reset</button>
+                    </p>
+                </form>
+
+                <p></p>
+                <p></p>
+                <h5>Sort By</h5>
+                <p></p>
+                <p class="btn-group" role="group">
+                    <button class="btn btn-outline-primary btn-sm" ng-click="sort('id')">Id</button>
+                    <button class="btn btn-outline-primary btn-sm" ng-click="sort('userId')">User ID</button>
+                    <button class="btn btn-outline-primary btn-sm" ng-click="sort('loginTime')">Login Time</button>
+                    <button class="btn btn-outline-primary btn-sm" ng-click="sort('method')">Method</button>
+                </p>
+            </td>
+
+            <td style="background-color:powderblue; padding-right:40px; width:50%">
+                <p></p>
+                <h5>New Session</h5>
+                <p></p>
+                <form novalidate class="align-middle input-group-sm" ng-submit="createSession()">
+                    <div class="mb-3 row">
+                        <label class="col-form-label form-control-sm">User ID</label>
+                        <div class="col-sm">
+                            <input type="number" class="form-control form-control-sm" ng-model="newSession.userId">
+                        </div>
+                    </div>
+                    <p></p>
+                    <div class="mb-3 row">
+                        <label class="col-form-label form-control-sm">Device Info</label>
+                        <div class="col-sm">
+                            <input type="text" class="form-control form-control-sm" ng-model="newSession.deviceInfo">
+                        </div>
+                    </div>
+                    <p></p>
+                    <div class="mb-3 row">
+                        <label class="col-form-label form-control-sm">Login Method</label>
+                        <div class="col-sm">
+                            <select class="form-control form-control-sm" ng-model="newSession.method">
+                                <option value="password">Password</option>
+                                <option value="biometric">Biometric</option>
+                                <option value="OAuth">OAuth</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p></p>
+                    <div class="rmb-3 row">
+                        <label class="col-form-label form-control-sm">IP-Address</label>
+                        <div class="col-sm">
+                            <input type="text" class="form-control form-control-sm" ng-model="newSession.ipAddress">
+                        </div>
+                    </div>
+                    <br/>
+                    <p></p>
+                    <p class="btn-group" role="group">
+                        <button type="submit" class="btn btn-outline-primary btn-sm">Create</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" ng-click="resetNewSession()">Reset</button>
+                    </p>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
     <div class="col-sn-20 col-md-9">
         <!--Список сессий-->

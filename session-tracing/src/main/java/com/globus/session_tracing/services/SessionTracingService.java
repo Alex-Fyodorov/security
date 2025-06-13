@@ -7,6 +7,7 @@ import com.globus.session_tracing.exceptions.TooManySessionsException;
 import com.globus.session_tracing.repositiries.RedisRepository;
 import com.globus.session_tracing.repositiries.SessionRepository;
 import com.globus.session_tracing.repositiries.specifications.SessionSpecification;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -54,12 +55,14 @@ public class SessionTracingService {
                 String.format("Сессия с id: %d не найдена.", id)));
     }
 
+    @Transactional
     public Session save(Session session) {
         int count = sessionRepository.sessionCount(session.getUserId());
         if (count >= 3) {
             throw new TooManySessionsException("Открыто слишком много сессий.");
         }
         session.setId(null);
+        session.setIsActive(true);
         session = sessionRepository.save(session);
         if (session.getId() != null) {
             redisRepository.add(session);
@@ -67,6 +70,7 @@ public class SessionTracingService {
         return session;
     }
 
+    @Transactional
     public void logout(long id) {
         Optional<Session> session = sessionRepository.findById(id);
         if (session.isEmpty()) {

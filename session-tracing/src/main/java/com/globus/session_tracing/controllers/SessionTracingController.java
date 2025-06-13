@@ -64,4 +64,5 @@ public class SessionTracingController {
 // TODO Дописать сваггер в SessionDto
 // TODO Доделать Schedul
 // TODO Доработать фильтрацию по датам
-// TODO Сделать блок ввода новых сессий
+// TODO Доработать фильтрацию по методу
+// TODO Перевести весь контроллер на ДТО
