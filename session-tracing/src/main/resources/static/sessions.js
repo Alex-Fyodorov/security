@@ -38,6 +38,7 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
         $scope.loadSessions();
     }
 
+// Форматирование времени для таблицы
     $scope.timeFormat = function (inTime) {
         const date = new Date(inTime);
         const year = date.getFullYear();

@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @RestController
 @RequestMapping("/api/v1/sessions")
@@ -38,18 +37,19 @@ public class SessionTracingController {
     }
 
     @GetMapping("/{id}")
-    public Session read(@PathVariable long id) {
-        return sessionTracingService.findBySessionId(id);
+    public SessionDto read(@PathVariable long id) {
+        return sessionConverter.toDto(sessionTracingService.findBySessionId(id));
     }
 
     @GetMapping("/redis/{id}")
-    public Session readFromRedis(@PathVariable long id) {
-        return sessionTracingService.findFromRedis(id);
+    public SessionDto readFromRedis(@PathVariable long id) {
+        return sessionConverter.toDto(sessionTracingService.findFromRedis(id));
     }
 
     @PostMapping
-    public Session create(@RequestBody Session log) {
-        return sessionTracingService.save(log);
+    public SessionDto create(@RequestBody SessionDto sessionDto) {
+        Session session = sessionConverter.toEntity(sessionDto);
+        return sessionConverter.toDto(sessionTracingService.save(session));
     }
 
     @GetMapping("/logout/{id}")
@@ -61,4 +61,4 @@ public class SessionTracingController {
 
 // TODO Дописать сваггер в SessionDto
 // TODO Доделать Schedul
-// TODO Перевести весь контроллер на ДТО
+// TODO Добавить валидатор
