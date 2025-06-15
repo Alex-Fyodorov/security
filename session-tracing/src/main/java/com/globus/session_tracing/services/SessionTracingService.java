@@ -10,6 +10,7 @@ import com.globus.session_tracing.repositiries.specifications.SessionSpecificati
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -18,17 +19,19 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Optional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SessionTracingService {
-    private final static int SESSIONS_IN_PAGE = 20;
-    private final static int SESSIONS_LIFE_DAYS = 183;
     private final SessionRepository sessionRepository;
     private final RedisRepository redisRepository;
+
+    @Value("${sessions.page.quantity}")
+    private int pageSize;
+    @Value("${sessions.life.days}")
+    private int sessionLifeDays;
 
     public Page<Session> findAll(Integer userId, LocalDateTime minLoginTime, String method,
                                  Boolean isActive, Integer page, String sort) {
@@ -47,7 +50,7 @@ public class SessionTracingService {
         }
         if (page < 1) page = 1;
         return sessionRepository.findAll(specification, PageRequest.of(page - 1,
-                SESSIONS_IN_PAGE, Sort.by(sort)));
+                pageSize, Sort.by(sort)));
     }
 
     public Session findBySessionId(long id) {
@@ -90,9 +93,10 @@ public class SessionTracingService {
                 String.format("Сессия с id: %d не найдена.", id)));
     }
 
-    @Scheduled(cron = "${task.cron.value}")
+    @Scheduled(cron = "${sessions.life.task.cron.value}")
     public void deleteOldSessions() {
-        log.info(String.format("Удаление сессий, созданных больше %d дней назад.", SESSIONS_LIFE_DAYS));
+        LocalDateTime date = LocalDateTime.now().minusDays(sessionLifeDays);
+        sessionRepository.deleteOldSessions(date);
+        log.info(String.format("Удаление сессий, созданных больше %d дней назад.", sessionLifeDays));
     }
-
 }

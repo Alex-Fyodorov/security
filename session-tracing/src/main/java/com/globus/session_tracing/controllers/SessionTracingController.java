@@ -63,10 +63,11 @@ public class SessionTracingController {
 }
 
 // TODO Дописать сваггер в SessionDto
-// TODO Доделать Schedul
+// TODO Продление сессии
 
 /*
 Обсудить:
 1. Метод делете
 2. Валидатор
+3. Продление сессии
 */

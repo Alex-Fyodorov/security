@@ -22,6 +22,11 @@ spring:
         format_sql: true
 #    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
-task:
-  cron:
-    value: 0 * * * * ?
+sessions:
+  page:
+    quantity: 20
+  life:
+    days: 183
+    task:
+      cron:
+        value: 0 * * * * ?
