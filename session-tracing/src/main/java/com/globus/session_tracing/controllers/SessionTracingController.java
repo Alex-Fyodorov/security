@@ -4,6 +4,7 @@ import com.globus.session_tracing.converters.SessionConverter;
 import com.globus.session_tracing.dtos.SessionDto;
 import com.globus.session_tracing.entities.Session;
 import com.globus.session_tracing.services.SessionTracingService;
+import com.globus.session_tracing.validators.SessionValidator;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 public class SessionTracingController {
     private final SessionTracingService sessionTracingService;
     private final SessionConverter sessionConverter;
+    private final SessionValidator sessionValidator;
 
     @GetMapping
     public Page<SessionDto> findAll(
@@ -48,6 +50,7 @@ public class SessionTracingController {
 
     @PostMapping
     public SessionDto create(@RequestBody SessionDto sessionDto) {
+        sessionValidator.validate(sessionDto);
         Session session = sessionConverter.toEntity(sessionDto);
         return sessionConverter.toDto(sessionTracingService.save(session));
     }
@@ -61,4 +64,9 @@ public class SessionTracingController {
 
 // TODO Дописать сваггер в SessionDto
 // TODO Доделать Schedul
-// TODO Добавить валидатор
+
+/*
+Обсудить:
+1. Метод делете
+2. Валидатор
+*/
