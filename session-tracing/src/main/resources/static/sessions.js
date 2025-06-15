@@ -88,6 +88,7 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
         $http.post(contextPath, $scope.newSession)
             .then(function successCallback(response) {
                 console.log(response.data);
+                alert("Новая сессия создана.\nid: " + response.data.id)
                 $scope.loadSessions();
             }
             , function errorCallback(response) {
