@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/sessions")
@@ -48,6 +50,17 @@ public class SessionTracingController {
         return sessionConverter.toDto(sessionTracingService.findFromRedis(id));
     }
 
+    @GetMapping("/active")
+    public List<SessionDto> readAllFromRedis() {
+        return sessionTracingService.findAllFromRedis()
+                .stream().map(sessionConverter::toDto).collect(Collectors.toList());
+    }
+
+    @GetMapping("/prolong/{id}")
+    public void prolongSession(@PathVariable Long id) {
+        sessionTracingService.prolongSession(id);
+    }
+
     @PostMapping
     public SessionDto create(@RequestBody SessionDto sessionDto) {
         sessionValidator.validate(sessionDto);
@@ -63,11 +76,13 @@ public class SessionTracingController {
 }
 
 // TODO Дописать сваггер в SessionDto
-// TODO Продление сессии
+// TODO Посмотреть по поводу операций с сессиями в сервисе и подумать, как их перекинуть на редис
 
 /*
 Обсудить:
-1. Метод делете
+1. Метод делете, код 204
 2. Валидатор
 3. Продление сессии
+4. Удаление старых сессий
+5. Ошибка 404 пользователь не найден
 */

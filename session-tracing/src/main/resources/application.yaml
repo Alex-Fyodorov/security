@@ -12,6 +12,8 @@ spring:
     redis:
       host: localhost
       port: 6387
+      lifetime:
+        minutes: 30
 
   jpa:
     open-in-view: true
@@ -29,4 +31,5 @@ sessions:
     days: 183
     task:
       cron:
-        value: 0 * * * * ?
+        delete-old: 0 * * * * *
+        delete-not-active: 0 */5 * * * *

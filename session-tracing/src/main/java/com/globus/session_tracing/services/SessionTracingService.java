@@ -19,6 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -89,14 +90,29 @@ public class SessionTracingService {
     }
 
     public Session findFromRedis(long id) {
-        return redisRepository.read(id).orElseThrow(() -> new SessionNotFoundException(
+        return redisRepository.findBySessionId(id).orElseThrow(() -> new SessionNotFoundException(
                 String.format("Сессия с id: %d не найдена.", id)));
     }
 
-    @Scheduled(cron = "${sessions.life.task.cron.value}")
+    @Scheduled(cron = "${sessions.life.task.cron.delete-old}")
     public void deleteOldSessions() {
         LocalDateTime date = LocalDateTime.now().minusDays(sessionLifeDays);
         sessionRepository.deleteOldSessions(date);
         log.info(String.format("Удаление сессий, созданных больше %d дней назад.", sessionLifeDays));
+    }
+
+    public List<Session> findAllFromRedis() {
+        return redisRepository.findAll();
+    }
+
+    public void prolongSession(Long id) {
+        redisRepository.prolongSession(id);
+    }
+
+    @Scheduled(cron = "${sessions.life.task.cron.delete-not-active}")
+    public void deleteNotActiveSessions() {
+        List<Long> keys = redisRepository.findAllKeys().stream().map(Long::valueOf).toList();
+        sessionRepository.closeNotActiveSessions(keys);
+        log.info("Закрытие сессий с истёкшим сроком ожидания.");
     }
 }

@@ -40,6 +40,7 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
 
 // Форматирование времени для таблицы
     $scope.timeFormat = function (inTime) {
+        if (inTime == null) return '';
         const date = new Date(inTime);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');

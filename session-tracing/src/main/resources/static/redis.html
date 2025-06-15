@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html ng-app="redisFront">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+    <script src="redis.js"></script>
+</head>
+
+<body>
+<div class="container container-md" ng-controller="redisController">
+
+    <br/>
+    <h2>Session Tracing (Redis)</h2>
+    <br/>
+
+    <div class="col-sm">
+        <!--Список сессий-->
+        <p></p>
+        <br/>
+        <h5>Sessions Page</h5>
+        <br/>
+        <table class="table table-hover">
+            <tr>
+                <td>Id</td>
+                <td>User ID</td>
+                <td>Login Time</td>
+                <td>Logout Time</td>
+                <td>Method</td>
+                <td>Device Info</td>
+                <td>IP-Address</td>
+                <td>Active</td>
+            </tr>
+            <tbody>
+            <tr ng-repeat="s in SessionsList">
+                <td>{{s.id}}</td>
+                <td>{{s.userId}}</td>
+                <td>{{timeFormat(s.loginTime)}}</td>
+                <td>{{timeFormat(s.logoutTime)}}</td>
+                <td>{{s.method}}</td>
+                <td>{{s.deviceInfo}}</td>
+                <td>{{s.ipAddress}}</td>
+                <td>{{s.isActive}}</td>
+                <td>
+                    <button class="btn btn-outline-danger" ng-show="s.isActive" ng-click="closeSession(s.id)">Close Session</button>
+                    <button class="btn btn-outline-secondary" ng-show="!s.isActive">Close Session</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!--Кнопки страниц-->
+<!--        <p class="btn-group" ng-repeat="n in [].constructor(totalPages) track by $index">-->
+<!--            <button class="btn btn-outline-info" ng-click="page($index + 1)">{{$index + 1}}</button>-->
+<!--        </p>-->
+    </div>
+</div>
+</body>
+</html>

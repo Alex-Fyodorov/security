@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface SessionRepository extends JpaRepository<Session, Long>,
@@ -26,4 +27,9 @@ public interface SessionRepository extends JpaRepository<Session, Long>,
     @Modifying
     @Query("delete from Session s where s.loginTime <= :date")
     void deleteOldSessions(LocalDateTime date);
+
+    @Transactional
+    @Modifying
+    @Query("update Session s set s.isActive = false, s.logoutTime = current_timestamp where s.isActive = true and s.id not in :keys")
+    void closeNotActiveSessions(List<Long> keys);
 }
