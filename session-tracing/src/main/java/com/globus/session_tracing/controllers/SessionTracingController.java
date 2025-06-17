@@ -173,5 +173,4 @@ public class SessionTracingController {
 }
 
 // TODO Можно ли сделать полный функционал на редис
-// TODO Сделать маскировку ip
 // TODO Тесты
