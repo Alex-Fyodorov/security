@@ -87,6 +87,7 @@ public class SessionTracingService {
         }
         session.setId(null);
         session.setIsActive(true);
+        session.setIpAddress(maskIp(session.getIpAddress()));
         session = sessionRepository.save(session);
         if (session.getId() != null) {
             redisRepository.add(session);
@@ -169,5 +170,20 @@ public class SessionTracingService {
         List<Long> keys = redisRepository.findAllKeys().stream().map(Long::valueOf).toList();
         sessionRepository.closeNotActiveSessions(keys);
         log.info("Закрытие сессий с истёкшим сроком ожидания.");
+    }
+
+    /**
+     * Маскировка IP-адреса
+     * @param ip IP-адрес
+     * @return маскированный IP-адрес
+     */
+    private static String maskIp(String ip) {
+        if (ip == null) return null;
+        String[] parts = ip.split("\\.");
+        if (parts.length != 4) return ip;
+        String first = parts[0];
+        String second = parts[1].isEmpty() ? "*" : parts[1].substring(0, 1);
+        String fourth = parts[3];
+        return String.format("%s.%s**.***.%s", first, second, fourth);
     }
 }
