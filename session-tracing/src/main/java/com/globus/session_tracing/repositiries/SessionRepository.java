@@ -15,19 +15,36 @@ import java.util.List;
 public interface SessionRepository extends JpaRepository<Session, Long>,
         JpaSpecificationExecutor<Session> {
 
+    /**
+     * Закрытие сессии по идентификатору.
+     * @param sessionId идентификатор сессии
+     */
     @Transactional
     @Modifying
     @Query("update Session s set s.isActive = false, s.logoutTime = current_timestamp where s.id = :sessionId and s.isActive = true")
     void logout (Long sessionId);
 
+    /**
+     * Подсчёт активных сессий конкретного пользователя.
+     * @param userId идентификатор пользователя
+     * @return
+     */
     @Query("select count(s.id) from Session s where s.userId = :userId and isActive = true")
     int sessionCount(int userId);
 
+    /**
+     * Удаление сессий, открытых раньше введёной даты.
+     * @param date дата
+     */
     @Transactional
     @Modifying
     @Query("delete from Session s where s.loginTime <= :date")
     void deleteOldSessions(LocalDateTime date);
 
+    /**
+     * Закрытие активных сессий, идентификаторов которых нет во введённом списке.
+     * @param keys список идентификаторов сессий, которые должны остаться активными
+     */
     @Transactional
     @Modifying
     @Query("update Session s set s.isActive = false, s.logoutTime = current_timestamp where s.isActive = true and s.id not in :keys")

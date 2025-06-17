@@ -34,6 +34,16 @@ public class SessionTracingService {
     @Value("${sessions.life.days}")
     private int sessionLifeDays;
 
+    /**
+     * Поиск всех сессий из базы данных, согласно введённым фильтрам.
+     * @param userId идентификатор польхователя
+     * @param minLoginTime время открытия сессии
+     * @param method метод входа пользователем в аккаунт
+     * @param isActive активна ли сессия
+     * @param page номер страницы
+     * @param sort сортировка списка на странице
+     * @return Page<Session> страница с сессиями
+     */
     public Page<Session> findAll(Integer userId, LocalDateTime minLoginTime, String method,
                                  Boolean isActive, Integer page, String sort) {
         Specification<Session> specification = (root, query, builder) -> null;
@@ -54,11 +64,21 @@ public class SessionTracingService {
                 pageSize, Sort.by(sort)));
     }
 
+    /**
+     * Поиск сессии в базе данных по идентификатору
+     * @param id идентификатор сессии
+     * @return Session
+     */
     public Session findBySessionId(long id) {
         return sessionRepository.findById(id).orElseThrow(() -> new SessionNotFoundException(
                 String.format("Сессия с id: %d не найдена.", id)));
     }
 
+    /**
+     * Внесение новой сессии в базу данных и Redis-репозиторий
+     * @param session сессия
+     * @return сессия после сохранения уже с присвоенным идентификатором
+     */
     @Transactional
     public Session save(Session session) {
         int count = sessionRepository.sessionCount(session.getUserId());
@@ -74,26 +94,62 @@ public class SessionTracingService {
         return session;
     }
 
+    /**
+     * Закрытие сессии по идентификатору.
+     * @param id идентификатор сессии
+     */
     @Transactional
     public void logout(long id) {
-        Optional<Session> session = sessionRepository.findById(id);
+        Optional<Session> session = redisRepository.findBySessionId(id);
         if (session.isEmpty()) {
-            throw new SessionNotFoundException(
-                    String.format("Сессия с id: %d не найдена.", id));
-        }
-        if (!session.get().getIsActive()) {
-            throw new SessionsOperationsException(String.format(
-                    "Невозможно выполнить операцию. Сессия с id: %d закрыта.", id));
+            session = sessionRepository.findById(id);
+            if (session.isEmpty()) {
+                throw new SessionNotFoundException(
+                        String.format("Сессия с id: %d не найдена.", id));
+            }
+            if (!session.get().getIsActive()) {
+                throw new SessionsOperationsException(String.format(
+                        "Невозможно выполнить операцию. Сессия с id: %d закрыта.", id));
+            }
         }
         sessionRepository.logout(id);
         redisRepository.delete(id);
     }
 
-    public Session findFromRedis(long id) {
+    /**
+     * Поиск всех сессий в Redis-репозитории
+     * @return List<Session> список сессий
+     */
+    public List<Session> findAllFromRedis() {
+        return redisRepository.findAll();
+    }
+
+    /**
+     * Поиск конкретной сессии в Redis-репозитории по идентификатору
+     * @param id идентификатор сессии
+     * @return Session
+     */
+    public Session findFromRedisById(long id) {
         return redisRepository.findBySessionId(id).orElseThrow(() -> new SessionNotFoundException(
                 String.format("Сессия с id: %d не найдена.", id)));
     }
 
+    /**
+     * В Redis хранятся только активные сессии. При отсутствии пользовательсткой
+     * активности сессия удаляется из Redis через 30 мин. При наличии же активности
+     * со стороны пользователя данный метод восстанавливает срок жизни сессии
+     * до изначальных 30 мин.
+     * @param id идентификатор сессии
+     */
+    public void prolongSession(Long id) {
+        redisRepository.prolongSession(id);
+    }
+
+    /**
+     * Регулярный метод. Срабатывает, согласно времени, указанному в настройках.
+     * Удаляет из базы данных сессии, созданные раньше Х дней назад.
+     * Величина Х также прописана в настройках {sessions.life.days}.
+     */
     @Scheduled(cron = "${sessions.life.task.cron.delete-old}")
     public void deleteOldSessions() {
         LocalDateTime date = LocalDateTime.now().minusDays(sessionLifeDays);
@@ -101,14 +157,13 @@ public class SessionTracingService {
         log.info(String.format("Удаление сессий, созданных больше %d дней назад.", sessionLifeDays));
     }
 
-    public List<Session> findAllFromRedis() {
-        return redisRepository.findAll();
-    }
-
-    public void prolongSession(Long id) {
-        redisRepository.prolongSession(id);
-    }
-
+    /**
+     * Регулярный метод. Срабатывает, согласно времени, указанному в настройках.
+     * Каждые несколько минут метод запрашивает в Redis-репозитории список
+     * идентификаторов активных сессий и предоставляет его базе данных.
+     * Сессии, котороые числятся в базе данных активными,
+     * но отсутствуют в этом списке, закрываются.
+     */
     @Scheduled(cron = "${sessions.life.task.cron.delete-not-active}")
     public void deleteNotActiveSessions() {
         List<Long> keys = redisRepository.findAllKeys().stream().map(Long::valueOf).toList();

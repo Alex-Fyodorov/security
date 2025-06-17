@@ -86,7 +86,7 @@ public class SessionTracingController {
             })
     public SessionDto readFromRedis(@PathVariable @Parameter(
             description = "Идентификатор сессии", required = true) long id) {
-        return sessionConverter.toDto(sessionTracingService.findFromRedis(id));
+        return sessionConverter.toDto(sessionTracingService.findFromRedisById(id));
     }
 
     @GetMapping("/active")
@@ -138,10 +138,12 @@ public class SessionTracingController {
                             content = @Content(schema = @Schema(implementation = AppError.class))
                     )
             })
-    public SessionDto create(@RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description = "Дапнные, необходимые для создания новой сессии",
-            required = true,
-            content = @Content(schema = @Schema(implementation = SessionDto.class))) SessionDto sessionDto) {
+    public SessionDto create(@RequestBody
+//                                 @io.swagger.v3.oas.annotations.parameters.RequestBody(
+//            description = "Дапнные, необходимые для создания новой сессии",
+//            required = true,
+//            content = @Content(schema = @Schema(implementation = SessionDto.class)))
+                                 SessionDto sessionDto) {
         sessionValidator.validate(sessionDto);
         Session session = sessionConverter.toEntity(sessionDto);
         return sessionConverter.toDto(sessionTracingService.save(session));
@@ -171,7 +173,6 @@ public class SessionTracingController {
 }
 
 // TODO Посмотреть по поводу операций с сессиями в сервисе и подумать, как их перекинуть на редис
-// TODO Комменты
 // TODO Отремонтировать кнопки страниц
 // TODO Сделать маскировку ip
 // TODO Тесты
