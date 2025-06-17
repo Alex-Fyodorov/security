@@ -66,7 +66,7 @@ public class SessionTracingController {
                             content = @Content(schema = @Schema(implementation = AppError.class))
                     )
             })
-    public SessionDto findDyId(@PathVariable @Parameter(
+    public SessionDto findById(@PathVariable @Parameter(
             description = "Идентификатор сессии", required = true) long id) {
         return sessionConverter.toDto(sessionTracingService.findBySessionId(id));
     }
