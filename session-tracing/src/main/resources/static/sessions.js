@@ -17,7 +17,7 @@ angular.module('sessionsFront', []).controller('sessionController', function ($s
         }).then(function(response) {
             console.log(response.data);
             $scope.SessionsList = response.data.content;
-            $scope.totalPages = response.data.totalPages;
+            $scope.totalPages = response.data.page.totalPages;
         });
     };
 
