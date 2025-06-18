@@ -139,10 +139,10 @@ public class SessionTracingController {
                     )
             })
     public SessionDto create(@RequestBody
-//                                 @io.swagger.v3.oas.annotations.parameters.RequestBody(
-//            description = "Дапнные, необходимые для создания новой сессии",
-//            required = true,
-//            content = @Content(schema = @Schema(implementation = SessionDto.class)))
+                                 @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Дапнные, необходимые для создания новой сессии",
+            required = true,
+            content = @Content(schema = @Schema(implementation = SessionDto.class)))
                                  SessionDto sessionDto) {
         sessionValidator.validate(sessionDto);
         Session session = sessionConverter.toEntity(sessionDto);
