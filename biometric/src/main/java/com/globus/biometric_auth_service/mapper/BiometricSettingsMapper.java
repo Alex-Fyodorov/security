@@ -27,6 +27,7 @@ public class BiometricSettingsMapper {
         deviceDto.setAccountId(device.getAccount().getId());
         deviceDto.setDeviceInfo(device.getDeviceInfo());
         deviceDto.setBiometricEnabled(device.getBiometricEnabled());
+        deviceDto.setBiometryType(device.getBiometryType().toString());
         return deviceDto;
     }
 }

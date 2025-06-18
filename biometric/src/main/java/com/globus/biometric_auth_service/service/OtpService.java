@@ -1,5 +1,6 @@
 package com.globus.biometric_auth_service.service;
 
+import com.globus.biometric_auth_service.util.Base64Service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -15,7 +16,7 @@ public class OtpService {
     private final StringRedisTemplate redisTemplate;
 
     public String generateOtp(String phoneNumber) {
-        String otp = RandomStringUtils.randomNumeric(OTP_LENGTH);
+        String otp = Base64Service.encode(RandomStringUtils.randomNumeric(OTP_LENGTH));
         redisTemplate.opsForValue().set(
                 phoneNumber,
                 otp,
@@ -26,6 +27,6 @@ public class OtpService {
 
     public boolean validateOtp(String phoneNumber, String otp) {
         String storedOtp = redisTemplate.opsForValue().get(phoneNumber);
-        return otp != null && otp.equals(storedOtp);
+        return otp != null && otp.equals(Base64Service.decode(storedOtp));
     }
 }

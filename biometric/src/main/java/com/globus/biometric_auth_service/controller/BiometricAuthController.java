@@ -7,7 +7,9 @@ import com.globus.biometric_auth_service.util.JwtTokenUtil;
 import com.globus.biometric_auth_service.validator.FieldsValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,9 +28,41 @@ public class BiometricAuthController {
     private final JwtTokenUtil jwtTokenUtil;
     private final FieldsValidator fieldsValidator;
 
+    /**
+     * Enables biometric authentication after validating registration fields and OTP.
+     *
+     * @param request Biometric registration request containing user credentials and device info
+     * @return ResponseEntity with biometric settings configuration
+     *
+     * @see io.swagger.v3.oas.annotations.parameters.RequestBody
+     * @see RequestBody
+     */
     @Operation(
             summary = "Enable biometric authentication",
-            description = "Enables biometric authentication for a user after validation"
+            description = "Enables biometric authentication for a user after validation",
+            parameters = {
+                @Parameter(
+                        name = "Accept-Language",
+                        in = ParameterIn.HEADER,
+                        schema = @Schema(type = "string", example = "en-US", description = "Language preference for response messages"),
+                        examples = {
+                                @ExampleObject(name = "English", value = "en-US"),
+                                @ExampleObject(name = "Russian", value = "ru-RU")
+                        }
+                ),
+                @Parameter(
+                        name = "Authorization",
+                        description = "Bearer token for authentication",
+                        in = ParameterIn.HEADER,
+                        schema = @Schema(type = "string", example = "Bearer <token>")
+                ),
+                @Parameter(
+                        name = "X-Request-ID",
+                        description = "Unique request identifier",
+                        in = ParameterIn.HEADER,
+                        schema = @Schema(type = "string", format = "uuid")
+                )
+            }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Biometric authentication enabled",
@@ -44,11 +78,26 @@ public class BiometricAuthController {
     public ResponseEntity<BiometricSettingsResponse> enableBiometricAuth(@io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Biometric registration request",
             required = true,
-            content = @Content(schema = @Schema(implementation = BiometricRegisterRequest.class))) @RequestBody BiometricRegisterRequest request) {
+            content = @Content(schema = @Schema(implementation = BiometricRegisterRequest.class))) @RequestBody BiometricRegisterRequest request,
+                                                                         @Parameter(hidden = true)
+                                                                         @RequestHeader(name = "Accept-Language", defaultValue = "en-US") String acceptLanguage,
+                                                                         @Parameter(hidden = true)
+                                                                         @RequestHeader(name = "Authorization", required = false) String authHeader,
+                                                                         @Parameter(hidden = true)
+                                                                         @RequestHeader(name = "X-Request-ID", required = false) String requestID) {
         fieldsValidator.registerValidate(request);
         return ResponseEntity.ok(biometricAuthService.enableBiometricAuth(request));
     }
 
+    /**
+     * Initiates biometric registration by sending OTP to user's phone.
+     *
+     * @param request Biometric registration request containing phone number
+     * @return ResponseEntity with generated OTP
+     *
+     * @see io.swagger.v3.oas.annotations.parameters.RequestBody
+     * @see RequestBody
+     */
     @Operation(
             summary = "Request OTP for biometric setup",
             description = "Generates a one-time password (OTP) for biometric authentication setup"
@@ -73,6 +122,15 @@ public class BiometricAuthController {
         return ResponseEntity.ok(new OtpResponse(otp));
     }
 
+    /**
+     * Authenticates user via biometric credentials and returns JWT token.
+     *
+     * @param request Biometric authentication credentials
+     * @return ResponseEntity with JWT token
+     *
+     * @see io.swagger.v3.oas.annotations.parameters.RequestBody
+     * @see RequestBody
+     */
     @Operation(
             summary = "Authenticate using biometrics",
             description = "Performs biometric authentication and returns a JWT token upon success"
@@ -96,6 +154,15 @@ public class BiometricAuthController {
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
+    /**
+     * Retrieves biometric authentication status for a specific user.
+     *
+     * @param userId ID of the user to check status for
+     * @return ResponseEntity with biometric settings status (HTTP 200)
+     *
+     * @see Parameter
+     * @see RequestParam
+     */
     @Operation(
             summary = "Get biometric authentication status",
             description = "Retrieves the biometric authentication status for a user"
@@ -118,6 +185,15 @@ public class BiometricAuthController {
         return ResponseEntity.ok(biometricAuthService.getBiometricAuthStatus(userId));
     }
 
+    /**
+     * Changes biometric enablement status for a specific device.
+     *
+     * @param request Device status change request containing enablement flag
+     * @return ResponseEntity with updated device configuration (HTTP 200)
+     *
+     * @see io.swagger.v3.oas.annotations.parameters.RequestBody
+     * @see RequestBody
+     */
     @Operation(
             summary = "Change device enabled status",
             description = "Enables/disables biometrics on a specific device"
