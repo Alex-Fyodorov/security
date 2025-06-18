@@ -1,0 +1,13 @@
+databaseChangeLog:
+
+  - include:
+      file: biometric_settings.sql
+      relativeToChangelogFile: true
+
+  - changeSet:
+      id: 01.00
+      author: Ilya Shutko
+      logicalFilePath: 01.00/db.changelog.yaml
+      changes:
+        - tagDatabase:
+            tag: 01.00
