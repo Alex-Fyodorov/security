@@ -28,4 +28,8 @@ public class Device {
 
     @Column(name = "biometric_enabled")
     private Boolean biometricEnabled;
+
+    @Column(name = "biometry_type")
+    @Enumerated(EnumType.STRING)
+    private BiometryType biometryType;
 }

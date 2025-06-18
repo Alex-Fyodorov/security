@@ -31,4 +31,5 @@ public class DeviceDto {
             example = "true"
     )
     private Boolean biometricEnabled;
+    private String biometryType;
 }

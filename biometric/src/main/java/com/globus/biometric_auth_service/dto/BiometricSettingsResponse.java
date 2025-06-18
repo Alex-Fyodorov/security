@@ -35,4 +35,3 @@ public class BiometricSettingsResponse {
     )
     private LocalDateTime lastUsed;
 }
-
