@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SessionRepository extends JpaRepository<Session, Long>,
@@ -49,4 +50,13 @@ public interface SessionRepository extends JpaRepository<Session, Long>,
     @Modifying
     @Query("update Session s set s.isActive = false, s.logoutTime = current_timestamp where s.isActive = true and s.id not in :keys")
     void closeNotActiveSessions(List<Long> keys);
+
+    /**
+     * Поиск идентификатора активной сессии по идентификатору пользователя и информации об устройстве
+     * @param userId идентификатор пользователя
+     * @param deviceInfo информация об устройстве
+     * @return идентификатор сессии
+     */
+    @Query("select s.id from Session s where s.isActive = true and s.userId = :userId and s.deviceInfo = :deviceInfo")
+    Optional<Long> findSessionIdByUserIdAndDeviceInfo(Integer userId, String deviceInfo);
 }

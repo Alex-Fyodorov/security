@@ -191,6 +191,20 @@ class SessionTracingServiceTest {
     }
 
     @Test
+    void prolongSessionByUserId_found() {
+        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.of(99L));
+        doNothing().when(redisRepository).prolongSession(99L);
+        service.prolongSessionByUserId(55, "android");
+        verify(redisRepository, times(1)).prolongSession(99L);
+    }
+
+    @Test
+    void prolongSessionByUserId_notFound() {
+        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.empty());
+        assertThrows(SessionNotFoundException.class, () -> service.prolongSessionByUserId(55, "android"));
+    }
+
+    @Test
     void deleteNotActiveSessions() {
         Set<String> keys = new HashSet<>(Arrays.asList("1", "2"));
         when(redisRepository.findAllKeys()).thenReturn(keys);

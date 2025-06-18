@@ -147,6 +147,21 @@ public class SessionTracingService {
     }
 
     /**
+     * В Redis хранятся только активные сессии. При отсутствии пользовательсткой
+     * активности сессия удаляется из Redis через 30 мин. При наличии же активности
+     * со стороны пользователя данный метод восстанавливает срок жизни сессии
+     * до изначальных 30 мин.
+     * @param userId идентификатор пользователя
+     * @param deviceInfo информация об устройстве
+     */
+    public void prolongSessionByUserId(Integer userId, String deviceInfo) {
+        Long sessionId = sessionRepository.findSessionIdByUserIdAndDeviceInfo(userId, deviceInfo)
+                .orElseThrow(() -> new SessionNotFoundException(String.format(
+                        "Активная сессия с userId: %d и deviceInfo: %s не найдена.", userId, deviceInfo)));
+        prolongSession(sessionId);
+    }
+
+    /**
      * Регулярный метод. Срабатывает, согласно времени, указанному в настройках.
      * Удаляет из базы данных сессии, созданные раньше Х дней назад.
      * Величина Х также прописана в настройках {sessions.life.days}.

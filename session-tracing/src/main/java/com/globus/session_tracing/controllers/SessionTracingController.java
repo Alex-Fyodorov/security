@@ -104,7 +104,7 @@ public class SessionTracingController {
     }
 
     @GetMapping("/prolong/{id}")
-    @Operation(summary = "Продление срока жизни сессии по id",
+    @Operation(summary = "Продление срока жизни сессии по идентификатору сессии",
             description = "При отсутствии активности сессия автоматически закрывается через 30 минут. " +
                     "Данный запрос подтверждает наличие активности и восстанавливает срок жизни сессии до начальных 30 минут.",
             responses = {
@@ -117,9 +117,30 @@ public class SessionTracingController {
                             content = @Content(schema = @Schema(implementation = AppError.class))
                     )
             })
-    public void prolongSession(@PathVariable @Parameter(
+    public void prolongSessionBySessionId(@PathVariable @Parameter(
             description = "Идентификатор сессии", required = true) Long id) {
         sessionTracingService.prolongSession(id);
+    }
+
+    @GetMapping("/prolong")
+    @Operation(summary = "Продление срока жизни сессии по идентификатору пользователя и информации об устройстве",
+            description = "При отсутствии активности сессия автоматически закрывается через 30 минут. " +
+                    "Данный запрос подтверждает наличие активности и восстанавливает срок жизни сессии до начальных 30 минут.",
+            responses = {
+                    @ApiResponse(
+                            description = "Успешный ответ", responseCode = "200",
+                            content = @Content(schema = @Schema(implementation = SessionDto.class))
+                    ),
+                    @ApiResponse(
+                            description = "Сессия не найдена или уже закрыта", responseCode = "404",
+                            content = @Content(schema = @Schema(implementation = AppError.class))
+                    )
+            })
+    public void prolongSessionByUserId(@RequestParam @Parameter(
+            description = "Идентификатор пользователя", required = true) Integer userId,
+                                       @RequestParam @Parameter(
+            description = "Информация об устройстве", required = true) String device_info) {
+        sessionTracingService.prolongSessionByUserId(userId, device_info);
     }
 
     @PostMapping
@@ -171,6 +192,3 @@ public class SessionTracingController {
     }
 
 }
-
-// TODO Можно ли сделать полный функционал на редис
-// TODO Тесты
