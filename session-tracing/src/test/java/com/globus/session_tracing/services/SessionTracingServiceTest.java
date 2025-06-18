@@ -99,6 +99,8 @@ class SessionTracingServiceTest {
     void save_whenUnderSessionLimit() {
         Session session = new Session();
         session.setUserId(10);
+        session.setDeviceInfo("deviceInfo");
+        session.setIpAddress("ipAddress");
         when(sessionRepository.sessionCount(10)).thenReturn(2);
         when(sessionRepository.save(any(Session.class))).thenAnswer(invocation -> {
             Session s = invocation.getArgument(0);
