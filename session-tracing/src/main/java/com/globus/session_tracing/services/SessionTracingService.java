@@ -7,6 +7,7 @@ import com.globus.session_tracing.exceptions.TooManySessionsException;
 import com.globus.session_tracing.repositiries.RedisRepository;
 import com.globus.session_tracing.repositiries.SessionRepository;
 import com.globus.session_tracing.repositiries.specifications.SessionSpecification;
+import com.globus.session_tracing.util.Base64Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +88,8 @@ public class SessionTracingService {
         }
         session.setId(null);
         session.setIsActive(true);
-        session.setIpAddress(maskIp(session.getIpAddress()));
+        session.setDeviceInfo(Base64Service.encode(session.getDeviceInfo()));
+        session.setIpAddress(maskIp(Base64Service.encode(session.getIpAddress())));
         session = sessionRepository.save(session);
         if (session.getId() != null) {
             redisRepository.add(session);
