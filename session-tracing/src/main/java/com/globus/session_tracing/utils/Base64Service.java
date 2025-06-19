@@ -1,4 +1,4 @@
-package com.globus.session_tracing.util;
+package com.globus.session_tracing.utils;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
