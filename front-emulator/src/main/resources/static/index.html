@@ -27,6 +27,20 @@
             <input class="form-control" type="text" placeholder="Phone Number" ng-model="registrationRequest.phoneNumber">
         </div>
         <div class="col-auto">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="radio11" ng-model="registrationRequest.biometricType" value="FINGERPRINT">
+                <label class="form-check-label" for="radio1">
+                    Fingerprint
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="radio12" checked ng-model="registrationRequest.biometricType" value="FACE_ID">
+                <label class="form-check-label" for="radio2">
+                    Face ID
+                </label>
+            </div>
+        </div>
+        <div class="col-auto">
             <button type="submit" class="btn btn-primary">Регистрация</button>
         </div>
     </form>
