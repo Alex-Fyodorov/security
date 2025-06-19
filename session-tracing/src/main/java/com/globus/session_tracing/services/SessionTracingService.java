@@ -7,7 +7,7 @@ import com.globus.session_tracing.exceptions.TooManySessionsException;
 import com.globus.session_tracing.repositiries.RedisRepository;
 import com.globus.session_tracing.repositiries.SessionRepository;
 import com.globus.session_tracing.repositiries.specifications.SessionSpecification;
-import com.globus.session_tracing.util.Base64Service;
+import com.globus.session_tracing.utils.Base64Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +62,7 @@ public class SessionTracingService {
         }
         if (page < 1) page = 1;
         return sessionRepository.findAll(specification, PageRequest.of(page - 1,
-                pageSize, Sort.by(sort)));
+                pageSize, Sort.by(sort))).map(this::decode);
     }
 
     /**
@@ -71,8 +71,9 @@ public class SessionTracingService {
      * @return Session
      */
     public Session findBySessionId(long id) {
-        return sessionRepository.findById(id).orElseThrow(() -> new SessionNotFoundException(
+        Session session = sessionRepository.findById(id).orElseThrow(() -> new SessionNotFoundException(
                 String.format("Сессия с id: %d не найдена.", id)));
+        return decode(session);
     }
 
     /**
@@ -124,7 +125,7 @@ public class SessionTracingService {
      * @return List<Session> список сессий
      */
     public List<Session> findAllFromRedis() {
-        return redisRepository.findAll();
+        return redisRepository.findAll().stream().map(this::decode).toList();
     }
 
     /**
@@ -133,8 +134,9 @@ public class SessionTracingService {
      * @return Session
      */
     public Session findFromRedisById(long id) {
-        return redisRepository.findBySessionId(id).orElseThrow(() -> new SessionNotFoundException(
+        Session session = redisRepository.findBySessionId(id).orElseThrow(() -> new SessionNotFoundException(
                 String.format("Сессия с id: %d не найдена.", id)));
+        return decode(session);
     }
 
     /**
@@ -194,7 +196,7 @@ public class SessionTracingService {
      * @param ip IP-адрес
      * @return маскированный IP-адрес
      */
-    private static String maskIp(String ip) {
+    private String maskIp(String ip) {
         if (ip == null) return null;
         String[] parts = ip.split("\\.");
         if (parts.length != 4) return ip;
@@ -202,5 +204,16 @@ public class SessionTracingService {
         String second = parts[1].isEmpty() ? "*" : parts[1].substring(0, 1);
         String fourth = parts[3];
         return String.format("%s.%s**.***.%s", first, second, fourth);
+    }
+
+    /**
+     * Декодирование IP-адреса и информации об устройстве
+     * @param session закодированная сессия
+     * @return декодированная сессия
+     */
+    private Session decode(Session session) {
+        session.setDeviceInfo(Base64Service.decode(session.getDeviceInfo()));
+        session.setIpAddress(Base64Service.decode(session.getIpAddress()));
+        return session;
     }
 }
