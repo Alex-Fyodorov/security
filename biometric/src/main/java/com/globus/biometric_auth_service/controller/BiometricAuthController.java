@@ -80,7 +80,7 @@ public class BiometricAuthController {
             required = true,
             content = @Content(schema = @Schema(implementation = BiometricRegisterRequest.class))) @RequestBody BiometricRegisterRequest request,
                                                                          @Parameter(hidden = true)
-                                                                         @RequestHeader(name = "Accept-Language", defaultValue = "en-US") String acceptLanguage,
+                                                                         @RequestHeader(name = "Accept-Language", required = false, defaultValue = "en-US") String acceptLanguage,
                                                                          @Parameter(hidden = true)
                                                                          @RequestHeader(name = "Authorization", required = false) String authHeader,
                                                                          @Parameter(hidden = true)
@@ -100,7 +100,24 @@ public class BiometricAuthController {
      */
     @Operation(
             summary = "Request OTP for biometric setup",
-            description = "Generates a one-time password (OTP) for biometric authentication setup"
+            description = "Generates a one-time password (OTP) for biometric authentication setup",
+            parameters = {
+                    @Parameter(
+                            name = "Accept-Language",
+                            in = ParameterIn.HEADER,
+                            schema = @Schema(type = "string", example = "en-US", description = "Language preference for response messages"),
+                            examples = {
+                                    @ExampleObject(name = "English", value = "en-US"),
+                                    @ExampleObject(name = "Russian", value = "ru-RU")
+                            }
+                    ),
+                    @Parameter(
+                            name = "X-Request-ID",
+                            description = "Unique request identifier",
+                            in = ParameterIn.HEADER,
+                            schema = @Schema(type = "string", format = "uuid")
+                    )
+            }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OTP generated successfully",
@@ -116,7 +133,11 @@ public class BiometricAuthController {
     public ResponseEntity<OtpResponse> requestBiometricAuth(@io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Biometric registration request",
             required = true,
-            content = @Content(schema = @Schema(implementation = BiometricRegisterRequest.class)))@RequestBody BiometricRegisterRequest request) {
+            content = @Content(schema = @Schema(implementation = BiometricRegisterRequest.class)))@RequestBody BiometricRegisterRequest request,
+                                                            @Parameter(hidden = true)
+                                                            @RequestHeader(name = "Accept-Language", required = false, defaultValue = "en-US") String acceptLanguage,
+                                                            @Parameter(hidden = true)
+                                                            @RequestHeader(name = "X-Request-ID", required = false) String requestID) {
         fieldsValidator.registerValidate(request);
         String otp = biometricAuthService.requestBiometricAuth(request);
         return ResponseEntity.ok(new OtpResponse(otp));
@@ -133,7 +154,30 @@ public class BiometricAuthController {
      */
     @Operation(
             summary = "Authenticate using biometrics",
-            description = "Performs biometric authentication and returns a JWT token upon success"
+            description = "Performs biometric authentication and returns a JWT token upon success",
+            parameters = {
+            @Parameter(
+                    name = "Accept-Language",
+                    in = ParameterIn.HEADER,
+                    schema = @Schema(type = "string", example = "en-US", description = "Language preference for response messages"),
+                    examples = {
+                            @ExampleObject(name = "English", value = "en-US"),
+                            @ExampleObject(name = "Russian", value = "ru-RU")
+                    }
+            ),
+            @Parameter(
+                    name = "Authorization",
+                    description = "Bearer token for authentication",
+                    in = ParameterIn.HEADER,
+                    schema = @Schema(type = "string", example = "Bearer <token>")
+            ),
+            @Parameter(
+                    name = "X-Request-ID",
+                    description = "Unique request identifier",
+                    in = ParameterIn.HEADER,
+                    schema = @Schema(type = "string", format = "uuid")
+            )
+    }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Authentication successful",
@@ -147,7 +191,13 @@ public class BiometricAuthController {
     public ResponseEntity<?> biometricAuthLogin(@io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Biometric authentication credentials",
             required = true,
-            content = @Content(schema = @Schema(implementation = BiometricAuthRequest.class))) @RequestBody BiometricAuthRequest request) {
+            content = @Content(schema = @Schema(implementation = BiometricAuthRequest.class))) @RequestBody BiometricAuthRequest request,
+                                                @Parameter(hidden = true)
+                                                @RequestHeader(name = "Accept-Language", required = false, defaultValue = "en-US") String acceptLanguage,
+                                                @Parameter(hidden = true)
+                                                @RequestHeader(name = "Authorization", required = false) String authHeader,
+                                                @Parameter(hidden = true)
+                                                @RequestHeader(name = "X-Request-ID", required = false) String requestID) {
         fieldsValidator.authValidate(request);
         UserDetails userDetails = biometricAuthService.biometricAuthLogin(request);
         String token = jwtTokenUtil.generateToken(userDetails);
@@ -165,7 +215,24 @@ public class BiometricAuthController {
      */
     @Operation(
             summary = "Get biometric authentication status",
-            description = "Retrieves the biometric authentication status for a user"
+            description = "Retrieves the biometric authentication status for a user",
+            parameters = {
+                    @Parameter(
+                            name = "Accept-Language",
+                            in = ParameterIn.HEADER,
+                            schema = @Schema(type = "string", example = "en-US", description = "Language preference for response messages"),
+                            examples = {
+                                    @ExampleObject(name = "English", value = "en-US"),
+                                    @ExampleObject(name = "Russian", value = "ru-RU")
+                            }
+                    ),
+                    @Parameter(
+                            name = "X-Request-ID",
+                            description = "Unique request identifier",
+                            in = ParameterIn.HEADER,
+                            schema = @Schema(type = "string", format = "uuid")
+                    )
+            }
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Biometric authentication enabled",
@@ -181,7 +248,11 @@ public class BiometricAuthController {
             description = "ID of the user to check status for",
             required = true,
             example = "12345"
-    )@RequestParam Integer userId) {
+    )@RequestParam Integer userId,
+                                                                            @Parameter(hidden = true)
+                                                                            @RequestHeader(name = "Accept-Language", required = false, defaultValue = "en-US") String acceptLanguage,
+                                                                            @Parameter(hidden = true)
+                                                                            @RequestHeader(name = "X-Request-ID", required = false) String requestID) {
         return ResponseEntity.ok(biometricAuthService.getBiometricAuthStatus(userId));
     }
 
