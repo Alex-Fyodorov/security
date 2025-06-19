@@ -100,10 +100,12 @@ public class SessionTracingService {
 
     /**
      * Закрытие сессии по идентификатору.
-     * @param id идентификатор сессии
+     * @param userId идентификатор пользователя
+     * @param deviceInfo информация об устройстве
      */
     @Transactional
-    public void logout(long id) {
+    public void logout(Integer userId, String deviceInfo) {
+        Long id = findSessionId(userId, deviceInfo);
         Optional<Session> session = redisRepository.findBySessionId(id);
         if (session.isEmpty()) {
             session = sessionRepository.findById(id);
@@ -144,25 +146,12 @@ public class SessionTracingService {
      * активности сессия удаляется из Redis через 30 мин. При наличии же активности
      * со стороны пользователя данный метод восстанавливает срок жизни сессии
      * до изначальных 30 мин.
-     * @param id идентификатор сессии
-     */
-    public void prolongSession(Long id) {
-        redisRepository.prolongSession(id);
-    }
-
-    /**
-     * В Redis хранятся только активные сессии. При отсутствии пользовательсткой
-     * активности сессия удаляется из Redis через 30 мин. При наличии же активности
-     * со стороны пользователя данный метод восстанавливает срок жизни сессии
-     * до изначальных 30 мин.
      * @param userId идентификатор пользователя
      * @param deviceInfo информация об устройстве
      */
-    public void prolongSessionByUserId(Integer userId, String deviceInfo) {
-        Long sessionId = sessionRepository.findSessionIdByUserIdAndDeviceInfo(userId, deviceInfo)
-                .orElseThrow(() -> new SessionNotFoundException(String.format(
-                        "Активная сессия с userId: %d и deviceInfo: %s не найдена.", userId, deviceInfo)));
-        prolongSession(sessionId);
+    public void prolongSession(Integer userId, String deviceInfo) {
+        Long sessionId = findSessionId(userId, deviceInfo);
+        redisRepository.prolongSession(sessionId);
     }
 
     /**
@@ -215,5 +204,11 @@ public class SessionTracingService {
         session.setDeviceInfo(Base64Service.decode(session.getDeviceInfo()));
         session.setIpAddress(Base64Service.decode(session.getIpAddress()));
         return session;
+    }
+
+    private Long findSessionId(Integer userId, String deviceInfo) {
+        return sessionRepository.findSessionIdByUserIdAndDeviceInfo(userId, deviceInfo)
+                .orElseThrow(() -> new SessionNotFoundException(String.format(
+                        "Активная сессия с userId: %d и deviceInfo: %s не найдена.", userId, deviceInfo)));
     }
 }

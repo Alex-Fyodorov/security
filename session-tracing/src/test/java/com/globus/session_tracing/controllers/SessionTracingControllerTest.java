@@ -97,18 +97,11 @@ class SessionTracingControllerTest {
     }
 
     @Test
-    void prolongSessionBySessionId() {
-        Long id = 101L;
-        controller.prolongSessionBySessionId(id);
-        verify(sessionTracingService, times(1)).prolongSession(id);
-    }
-
-    @Test
-    void prolongSessionByUserId() {
+    void prolongSession() {
         Integer userId = 55;
         String deviceInfo = "android";
-        controller.prolongSessionByUserId(userId, deviceInfo);
-        verify(sessionTracingService, times(1)).prolongSessionByUserId(userId, deviceInfo);
+        controller.prolongSession(userId, deviceInfo);
+        verify(sessionTracingService, times(1)).prolongSession(userId, deviceInfo);
     }
 
     @Test
@@ -134,8 +127,9 @@ class SessionTracingControllerTest {
 
     @Test
     void logout() {
-        long id = 77L;
-        controller.logout(id);
-        verify(sessionTracingService, times(1)).logout(id);
+        Integer userId = 55;
+        String deviceInfo = "android";
+        controller.logout(userId, deviceInfo);
+        verify(sessionTracingService, times(1)).logout(userId, deviceInfo);
     }
 }

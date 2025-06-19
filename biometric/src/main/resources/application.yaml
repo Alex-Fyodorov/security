@@ -24,3 +24,10 @@ spring:
 
   liquibase:
     enabled: true
+
+integrations:
+  session-tracing-service:
+    url: http://localhost:8337/api/v1/sessions
+    connect-timeout: 5000
+    read-timeout: 25000
+    write-timeout: 5000

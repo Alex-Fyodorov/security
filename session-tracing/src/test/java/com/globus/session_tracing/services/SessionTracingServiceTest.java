@@ -128,30 +128,37 @@ class SessionTracingServiceTest {
     void logout_success() {
         Session session = new Session();
         session.setId(44L);
+        session.setUserId(55);
+        session.setDeviceInfo("android");
         session.setIsActive(true);
+        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.of(44L));
         when(sessionRepository.findById(44L)).thenReturn(Optional.of(session));
         doNothing().when(sessionRepository).logout(44L);
         when(redisRepository.delete(44L)).thenReturn(true);
 
-        assertDoesNotThrow(() -> service.logout(44L));
+        assertDoesNotThrow(() -> service.logout(55, "android"));
         verify(sessionRepository, times(1)).logout(44L);
         verify(redisRepository, times(1)).delete(44L);
     }
 
     @Test
     void logout_notFound() {
-        when(sessionRepository.findById(77L)).thenReturn(Optional.empty());
-        assertThrows(SessionNotFoundException.class, () -> service.logout(77L));
+        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.of(44L));
+        when(sessionRepository.findById(44L)).thenReturn(Optional.empty());
+        assertThrows(SessionNotFoundException.class, () -> service.logout(55, "android"));
     }
 
     @Test
     void logout_closedSession() {
         Session session = new Session();
-        session.setId(55L);
+        session.setId(44L);
+        session.setUserId(55);
+        session.setDeviceInfo("android");
         session.setIsActive(false);
-        when(sessionRepository.findById(55L)).thenReturn(Optional.of(session));
+        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.of(44L));
+        when(sessionRepository.findById(44L)).thenReturn(Optional.of(session));
 
-        assertThrows(SessionsOperationsException.class, () -> service.logout(55L));
+        assertThrows(SessionsOperationsException.class, () -> service.logout(55, "android"));
         verify(sessionRepository, never()).logout(anyLong());
     }
 
@@ -186,24 +193,17 @@ class SessionTracingServiceTest {
     }
 
     @Test
-    void prolongSession() {
-        doNothing().when(redisRepository).prolongSession(99L);
-        service.prolongSession(99L);
-        verify(redisRepository, times(1)).prolongSession(99L);
-    }
-
-    @Test
-    void prolongSessionByUserId_found() {
+    void prolongSession_found() {
         when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.of(99L));
         doNothing().when(redisRepository).prolongSession(99L);
-        service.prolongSessionByUserId(55, "android");
+        service.prolongSession(55, "android");
         verify(redisRepository, times(1)).prolongSession(99L);
     }
 
     @Test
     void prolongSessionByUserId_notFound() {
         when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.empty());
-        assertThrows(SessionNotFoundException.class, () -> service.prolongSessionByUserId(55, "android"));
+        assertThrows(SessionNotFoundException.class, () -> service.prolongSession(55, "android"));
     }
 
     @Test

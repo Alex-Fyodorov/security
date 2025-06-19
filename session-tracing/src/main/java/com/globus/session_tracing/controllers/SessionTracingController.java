@@ -103,25 +103,6 @@ public class SessionTracingController {
                 .stream().map(sessionConverter::toDto).collect(Collectors.toList());
     }
 
-    @GetMapping("/prolong/{id}")
-    @Operation(summary = "Продление срока жизни сессии по идентификатору сессии",
-            description = "При отсутствии активности сессия автоматически закрывается через 30 минут. " +
-                    "Данный запрос подтверждает наличие активности и восстанавливает срок жизни сессии до начальных 30 минут.",
-            responses = {
-                    @ApiResponse(
-                            description = "Успешный ответ", responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = SessionDto.class))
-                    ),
-                    @ApiResponse(
-                            description = "Сессия не найдена или уже закрыта", responseCode = "404",
-                            content = @Content(schema = @Schema(implementation = AppError.class))
-                    )
-            })
-    public void prolongSessionBySessionId(@PathVariable @Parameter(
-            description = "Идентификатор сессии", required = true) Long id) {
-        sessionTracingService.prolongSession(id);
-    }
-
     @GetMapping("/prolong")
     @Operation(summary = "Продление срока жизни сессии по идентификатору пользователя и информации об устройстве",
             description = "При отсутствии активности сессия автоматически закрывается через 30 минут. " +
@@ -136,11 +117,11 @@ public class SessionTracingController {
                             content = @Content(schema = @Schema(implementation = AppError.class))
                     )
             })
-    public void prolongSessionByUserId(@RequestParam @Parameter(
+    public void prolongSession(@RequestParam (name = "user_id") @Parameter(
             description = "Идентификатор пользователя", required = true) Integer userId,
-                                       @RequestParam @Parameter(
-            description = "Информация об устройстве", required = true) String device_info) {
-        sessionTracingService.prolongSessionByUserId(userId, device_info);
+                                       @RequestParam (name = "device_info") @Parameter(
+            description = "Информация об устройстве", required = true) String deviceInfo) {
+        sessionTracingService.prolongSession(userId, deviceInfo);
     }
 
     @PostMapping
@@ -170,7 +151,7 @@ public class SessionTracingController {
         return sessionConverter.toDto(sessionTracingService.save(session));
     }
 
-    @GetMapping("/logout/{id}")
+    @GetMapping("/logout")
     @Operation(summary = "Запрос на закрытие сессии",
             responses = {
                     @ApiResponse(
@@ -186,9 +167,11 @@ public class SessionTracingController {
                             content = @Content(schema = @Schema(implementation = AppError.class))
                     )
             })
-    public void logout(@PathVariable @Parameter(
-            description = "Идентификатор сессии", required = true) long id) {
-        sessionTracingService.logout(id);
+    public void logout(@RequestParam (name = "user_id") @Parameter(
+            description = "Идентификатор пользователя", required = true) Integer userId,
+                       @RequestParam (name = "device_info") @Parameter(
+                               description = "Информация об устройстве", required = true) String deviceInfo) {
+        sessionTracingService.logout(userId, deviceInfo);
     }
 
 }

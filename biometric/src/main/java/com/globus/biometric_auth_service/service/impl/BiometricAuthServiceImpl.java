@@ -3,6 +3,7 @@ package com.globus.biometric_auth_service.service.impl;
 import com.globus.biometric_auth_service.dto.*;
 import com.globus.biometric_auth_service.exception.IllegalAuthStateException;
 import com.globus.biometric_auth_service.exception.UserNotFoundException;
+import com.globus.biometric_auth_service.integration.SessionTracingIntegrations;
 import com.globus.biometric_auth_service.mapper.BiometricSettingsMapper;
 import com.globus.biometric_auth_service.model.BiometricSettings;
 import com.globus.biometric_auth_service.model.BiometryType;
@@ -31,6 +32,7 @@ public class BiometricAuthServiceImpl implements BiometricAuthService {
     private final DeviceService deviceService;
     private final OtpService otpService;
     private final SmsService smsService;
+    private final SessionTracingIntegrations sessionTracingIntegrations;
 
     /**
      * Enables biometric authentication for a user after OTP validation.
@@ -93,6 +95,7 @@ public class BiometricAuthServiceImpl implements BiometricAuthService {
                 String.valueOf(request.userId()), "null", getAuthority(List.of("ROLE_USER")));
         settings.setLastUsed(null);
         settingsRepository.save(settings);
+        sessionTracingIntegrations.login(request.userId(), request.deviceInfo(), "biometric", "111.222.333.444");
         return userDetails;
     }
 
