@@ -206,6 +206,12 @@ public class SessionTracingService {
         return session;
     }
 
+    /**
+     * Получение идентификатора сессии по идентификатору пользователя и информации об устройстве
+     * @param userId идентификатор пользователя
+     * @param deviceInfo информация об устройстве
+     * @return идентификатор сессии
+     */
     private Long findSessionId(Integer userId, String deviceInfo) {
         return sessionRepository.findSessionIdByUserIdAndDeviceInfo(userId, deviceInfo)
                 .orElseThrow(() -> new SessionNotFoundException(String.format(
