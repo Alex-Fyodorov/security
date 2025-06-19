@@ -1,5 +1,9 @@
 package com.globus.android_emulator.dto;
 
-public record BiometricRegisterRequest(String deviceInfo, Integer userId,
-                                       String phoneNumber, String otp) {
+public record BiometricRegisterRequest(
+        String deviceInfo,
+        Integer userId,
+        String phoneNumber,
+        String otp,
+        String biometricType) {
 }
