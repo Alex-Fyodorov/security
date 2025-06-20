@@ -1,4 +1,4 @@
-angular.module('androidEmulator', ['ngStorage']).controller('emulatorController', function ($scope, $http) {
+angular.module('front').controller('emulatorController', function ($scope, $http) {
     const contextPath = 'http://localhost:8193/android-emulator/api/v1';
 
     $scope.registration = function () {

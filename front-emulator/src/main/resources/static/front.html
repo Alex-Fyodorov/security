@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html ng-app="front" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular-route.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.11/ngStorage.min.js"></script>
+    <script src="front.js"></script>
+    <script src="welcome/welcome.js"></script>
+    <script src="android/android.js"></script>
+    <script src="session_tracing_DB/sessions.js"></script>
+    <script src="session_tracing_Redis/redis.js"></script>
+    <title>Security Module</title>
+</head>
+<body>
+<div class="container" ng-controller="frontController">
+
+    <div class="container container-md">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#!/">Welcome</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#!/android">Android-Emulator</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#!/session">Sessions-DB</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#!/redis">Sessions-Redis</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <ng-view></ng-view>
+
+</div>
+</body>
+</html>

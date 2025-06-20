@@ -201,8 +201,12 @@ public class SessionTracingService {
      * @return декодированная сессия
      */
     private Session decode(Session session) {
-        session.setDeviceInfo(Base64Service.decode(session.getDeviceInfo()));
-        session.setIpAddress(Base64Service.decode(session.getIpAddress()));
+        if (session.getDeviceInfo() != null) {
+            session.setDeviceInfo(Base64Service.decode(session.getDeviceInfo()));
+        }
+        if (session.getIpAddress() != null) {
+            session.setIpAddress(Base64Service.decode(session.getIpAddress()));
+        }
         return session;
     }
 
