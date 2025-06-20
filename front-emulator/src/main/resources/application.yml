@@ -10,7 +10,7 @@ integrations:
     read-timeout: 25000
     write-timeout: 5000
   session-service:
-    url: http://localhost:8337/api/v1/sessions/
+    url: http://localhost:8337/api/v1/sessions
     connect-timeout: 5000
     read-timeout: 25000
     write-timeout: 5000

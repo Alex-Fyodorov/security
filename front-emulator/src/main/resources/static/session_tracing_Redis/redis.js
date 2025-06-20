@@ -1,5 +1,5 @@
 angular.module('front').controller('redisController', function ($scope, $http) {
-    const contextPath = 'http://localhost:8337/api/v1/sessions';
+    const contextPath = 'http://localhost:8193/android-emulator/api/v1/session';
 
 // Загрузка списка сессий
     $scope.loadSessions = function () {

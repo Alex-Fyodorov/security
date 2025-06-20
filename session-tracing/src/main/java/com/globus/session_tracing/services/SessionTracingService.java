@@ -54,7 +54,7 @@ public class SessionTracingService {
         if (minLoginTime != null) {
             specification = specification.and(SessionSpecification.loginTimeGreaterOrEqualThan(minLoginTime));
         }
-        if (method != null) {
+        if (method != null && !method.isBlank()) {
             specification = specification.and(SessionSpecification.methodEqualTo(method));
         }
         if (isActive != null) {
