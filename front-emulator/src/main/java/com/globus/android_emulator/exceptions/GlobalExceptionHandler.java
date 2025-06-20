@@ -32,4 +32,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
                 exception.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<AppError> catchTooManySessionsException(TooManySessionsException exception) {
+        log.error(exception.getMessage(), exception);
+        return new ResponseEntity<>(new AppError(HttpStatus.NOT_ACCEPTABLE.value(),
+                exception.getMessage()), HttpStatus.NOT_ACCEPTABLE);
+    }
 }
