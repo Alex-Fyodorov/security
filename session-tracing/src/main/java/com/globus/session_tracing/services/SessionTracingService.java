@@ -2,7 +2,6 @@ package com.globus.session_tracing.services;
 
 import com.globus.session_tracing.entities.Session;
 import com.globus.session_tracing.exceptions.SessionNotFoundException;
-import com.globus.session_tracing.exceptions.SessionsOperationsException;
 import com.globus.session_tracing.exceptions.TooManySessionsException;
 import com.globus.session_tracing.repositiries.RedisRepository;
 import com.globus.session_tracing.repositiries.SessionRepository;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -83,14 +81,25 @@ public class SessionTracingService {
      */
     @Transactional
     public Session save(Session session) {
-        int count = sessionRepository.sessionCount(session.getUserId());
-        if (count >= 3) {
+        // Если есть сессии, открытые этим же пользователем с этого же устройства, сначала закрываем их.
+        try {
+            logout(session.getUserId(), session.getDeviceInfo());
+        } catch (SessionNotFoundException e) {
+            log.info(String.format("Активныхсессий с userID: %d и deviceInfo: %s не найдено",
+                    session.getUserId(), session.getDeviceInfo()));
+        }
+
+        // Проверяем количество открытых сессий у этого пользователя.
+        List<Session> sessions = redisRepository.findAllByUserId(session.getUserId());
+        if (sessions.size() >= 3) {
             throw new TooManySessionsException("Открыто слишком много сессий.");
         }
+
+        // Сохраняем сессию
         session.setId(null);
         session.setIsActive(true);
         session.setDeviceInfo(Base64Service.encode(session.getDeviceInfo()));
-        session.setIpAddress(maskIp(Base64Service.encode(session.getIpAddress())));
+        session.setIpAddress(Base64Service.encode(maskIp(session.getIpAddress())));
         session = sessionRepository.save(session);
         if (session.getId() != null) {
             redisRepository.add(session);
@@ -99,27 +108,40 @@ public class SessionTracingService {
     }
 
     /**
-     * Закрытие сессии по идентификатору.
+     * Закрытие сессии по идентификатору пользователя и информации об устройстве
      * @param userId идентификатор пользователя
      * @param deviceInfo информация об устройстве
      */
     @Transactional
-    public void logout(Integer userId, String deviceInfo) {
-        Long id = findSessionId(userId, deviceInfo);
-        Optional<Session> session = redisRepository.findBySessionId(id);
-        if (session.isEmpty()) {
-            session = sessionRepository.findById(id);
-            if (session.isEmpty()) {
-                throw new SessionNotFoundException(
-                        String.format("Сессия с id: %d не найдена.", id));
-            }
-            if (!session.get().getIsActive()) {
-                throw new SessionsOperationsException(String.format(
-                        "Невозможно выполнить операцию. Сессия с id: %d закрыта.", id));
-            }
+    public void logout(Integer userId, String deviceInfo) throws SessionNotFoundException {
+        List<Session> sessions = findAllSessionsByUserIdAndDeviceInfo(userId, deviceInfo);
+        if (sessions.isEmpty()) {
+            throw new SessionNotFoundException(String.format(
+                    "Активныхсессий с userID: %d и deviceInfo: %s не найдено", userId, deviceInfo));
         }
-        sessionRepository.logout(id);
-        redisRepository.delete(id);
+        for (Session session : sessions) {
+            sessionRepository.logout(session.getId());
+            redisRepository.delete(session.getId());
+        }
+    }
+
+    /**
+     * Поиск всех активных сессий по идентификатору пользователя и информации об устройстве.
+     * В идеале таких сессий должно быть не больше одной. Однако если по каким-то причинам
+     * одна из сессий не закрылась и возникло две сессии с похожими идентификатором
+     * пользователя и информациуй об устройстве, может возникнуть ошибка. В данном случае
+     * выгоднее, чтобы программа обработала обе сессии, чем выдала ошибку, поэтому
+     * возвращается не единичная сессия, а список.
+     * @param userId идентификатор пользователя
+     * @param deviceInfo информация об устройстве
+     * @return список сессий
+     */
+    private List<Session> findAllSessionsByUserIdAndDeviceInfo(Integer userId, String deviceInfo) {
+        String codeDeviceInfo = Base64Service.encode(deviceInfo);
+        return redisRepository.findAllByUserId(userId)
+                .stream()
+                .filter(s -> s.getDeviceInfo().equals(codeDeviceInfo))
+                .toList();
     }
 
     /**
@@ -141,6 +163,21 @@ public class SessionTracingService {
         return decode(session);
     }
 
+    /*
+    Примечание:
+    Метод prolongSession() должен вызываться при каждом действии пользователя,
+    подтверждая таким образом, что данная сессия активна. При этом логично было бы
+    продлять срок жизни сессии по её идентификатору, то есть по Redis-ключу.
+    Однако для этого необходимо этот ключ знать, и это значит, что id сессии должен
+    постоянно предоставляться пользователем либо в отдельном хедере, либо как одно
+    из полей jwt-токена. В следствие отсутствия архитектуры я не мог гарантировать,
+    что у пользователя будут сведелия об id сессии, поэтому сделал доступ к продлению
+    сессии (и некоторым другим методам) по id пользователя и информации об устройстве,
+    что сильно увеличивает нагрузку на данный микросервис в общем и Redis в частности.
+    Есть и другие способы решить эту проблему, но к сожалению, они приводят к новым
+    проблемам.
+     */
+
     /**
      * В Redis хранятся только активные сессии. При отсутствии пользовательсткой
      * активности сессия удаляется из Redis через 30 мин. При наличии же активности
@@ -150,8 +187,14 @@ public class SessionTracingService {
      * @param deviceInfo информация об устройстве
      */
     public void prolongSession(Integer userId, String deviceInfo) {
-        Long sessionId = findSessionId(userId, deviceInfo);
-        redisRepository.prolongSession(sessionId);
+        List<Session> sessions = findAllSessionsByUserIdAndDeviceInfo(userId, deviceInfo);
+        if (sessions.isEmpty()) {
+            throw new SessionNotFoundException(String.format(
+                    "Активныхсессий с userID: %d и deviceInfo: %s не найдено", userId, deviceInfo));
+        }
+        for (Session session : sessions) {
+            redisRepository.prolongSession(session.getId());
+        }
     }
 
     /**
@@ -208,17 +251,5 @@ public class SessionTracingService {
             session.setIpAddress(Base64Service.decode(session.getIpAddress()));
         }
         return session;
-    }
-
-    /**
-     * Получение идентификатора сессии по идентификатору пользователя и информации об устройстве
-     * @param userId идентификатор пользователя
-     * @param deviceInfo информация об устройстве
-     * @return идентификатор сессии
-     */
-    private Long findSessionId(Integer userId, String deviceInfo) {
-        return sessionRepository.findSessionIdByUserIdAndDeviceInfo(userId, Base64Service.encode(deviceInfo))
-                .orElseThrow(() -> new SessionNotFoundException(String.format(
-                        "Активная сессия с userId: %d и deviceInfo: %s не найдена.", userId, deviceInfo)));
     }
 }

@@ -161,11 +161,11 @@ public class SessionTracingController {
                     @ApiResponse(
                             description = "Сессия не найдена", responseCode = "404",
                             content = @Content(schema = @Schema(implementation = AppError.class))
-                    ),
-                    @ApiResponse(
-                            description = "Невозможно выполнить операцию. Сессия с уже закрыта.", responseCode = "406",
-                            content = @Content(schema = @Schema(implementation = AppError.class))
-                    )
+                    )//,
+//                    @ApiResponse(
+//                            description = "Невозможно выполнить операцию. Сессия с уже закрыта.", responseCode = "406",
+//                            content = @Content(schema = @Schema(implementation = AppError.class))
+//                    )
             })
     public void logout(@RequestParam (name = "user_id") @Parameter(
             description = "Идентификатор пользователя", required = true) Integer userId,

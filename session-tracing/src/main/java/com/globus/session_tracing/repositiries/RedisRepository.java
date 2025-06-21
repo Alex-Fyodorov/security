@@ -86,4 +86,16 @@ public class RedisRepository {
     public boolean delete(long id) {
         return redisTemplate.delete(String.valueOf(id));
     }
+
+    /**
+     * Поиск всех сессий по идентификатору пользователя.
+     * @param userId идентификатор пользователя
+     * @return список сессий
+     */
+    public List<Session> findAllByUserId(Integer userId) {
+        return redisTemplate.keys("*").stream()
+                .map(k -> (Session) redisTemplate.opsForValue().get(k))
+                .filter(s -> s.getUserId().equals(userId))
+                .toList();
+    }
 }
