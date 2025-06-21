@@ -217,7 +217,7 @@ public class SessionTracingService {
      * @return идентификатор сессии
      */
     private Long findSessionId(Integer userId, String deviceInfo) {
-        return sessionRepository.findSessionIdByUserIdAndDeviceInfo(userId, deviceInfo)
+        return sessionRepository.findSessionIdByUserIdAndDeviceInfo(userId, Base64Service.encode(deviceInfo))
                 .orElseThrow(() -> new SessionNotFoundException(String.format(
                         "Активная сессия с userId: %d и deviceInfo: %s не найдена.", userId, deviceInfo)));
     }

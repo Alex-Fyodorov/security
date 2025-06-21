@@ -1,5 +1,5 @@
 angular.module('front').controller('emulatorController', function ($scope, $http) {
-    const contextPath = 'http://localhost:8193/android-emulator/api/v1';
+    const contextPath = 'http://localhost:8193/android-emulator/api/v1/biometric';
 
     $scope.registration = function () {
         $http.post(contextPath + '/registration', $scope.registrationRequest)

@@ -24,7 +24,7 @@ angular.module('front').controller('redisController', function ($scope, $http) {
 // Закрыть сессию
     $scope.closeSession = function (userId, deviceInfo) {
         $http({
-            url: contextPathSessions + '/logout',
+            url: contextPath + '/logout',
             method: 'get',
             params: {
                 user_id: userId,
