@@ -26,14 +26,6 @@ public interface SessionRepository extends JpaRepository<Session, Long>,
     void logout (Long sessionId);
 
     /**
-     * Подсчёт активных сессий конкретного пользователя.
-     * @param userId идентификатор пользователя
-     * @return
-     */
-    @Query("select count(s.id) from Session s where s.userId = :userId and isActive = true")
-    int sessionCount(int userId);
-
-    /**
      * Удаление сессий, открытых раньше введёной даты.
      * @param date дата
      */

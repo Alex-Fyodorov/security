@@ -6,6 +6,7 @@ import com.globus.session_tracing.exceptions.SessionsOperationsException;
 import com.globus.session_tracing.exceptions.TooManySessionsException;
 import com.globus.session_tracing.repositiries.RedisRepository;
 import com.globus.session_tracing.repositiries.SessionRepository;
+import com.globus.session_tracing.utils.Base64Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -96,12 +99,16 @@ class SessionTracingServiceTest {
     }
 
     @Test
-    void save_whenUnderSessionLimit() {
+    void save_success() {
+        List<Session> sessions = new ArrayList<>();
+        sessions.add(new Session(1L, 1, null, null, null, null, "YQ==", null));
+        sessions.add(new Session(2L, 1, null, null, null, null, "Yw==", null));
+        when(redisRepository.findAllByUserId(1)).thenReturn(sessions);
         Session session = new Session();
-        session.setUserId(10);
-        session.setDeviceInfo("deviceInfo");
+        session.setUserId(1);
+        session.setDeviceInfo("android");
         session.setIpAddress("ipAddress");
-        when(sessionRepository.sessionCount(10)).thenReturn(2);
+
         when(sessionRepository.save(any(Session.class))).thenAnswer(invocation -> {
             Session s = invocation.getArgument(0);
             s.setId(42L);
@@ -109,79 +116,47 @@ class SessionTracingServiceTest {
         });
 
         Session saved = service.save(session);
-
         assertNotNull(saved.getId());
         verify(redisRepository, times(1)).add(saved);
     }
 
     @Test
     void save_whenTooManySessions() {
+        findAllByUserId();
         Session session = new Session();
-        session.setUserId(11);
-        when(sessionRepository.sessionCount(11)).thenReturn(3);
-
+        session.setUserId(1);
+        session.setDeviceInfo("android");
         assertThrows(TooManySessionsException.class, () -> service.save(session));
         verify(redisRepository, never()).add(any());
+        verify(sessionRepository, never()).save(any());
     }
 
     @Test
     void logout_success() {
-        Session session = new Session();
-        session.setId(44L);
-        session.setUserId(55);
-        session.setDeviceInfo("android");
-        session.setIsActive(true);
-        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.of(44L));
-        when(sessionRepository.findById(44L)).thenReturn(Optional.of(session));
-        doNothing().when(sessionRepository).logout(44L);
-        when(redisRepository.delete(44L)).thenReturn(true);
-
-        assertDoesNotThrow(() -> service.logout(55, "android"));
-        verify(sessionRepository, times(1)).logout(44L);
-        verify(redisRepository, times(1)).delete(44L);
+        findAllByUserId();
+        assertDoesNotThrow(() -> service.logout(1, "a"));
+        verify(sessionRepository, times(2)).logout(anyLong());
+        verify(redisRepository, times(2)).delete(anyLong());
     }
 
     @Test
     void logout_notFound() {
-        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.of(44L));
-        when(sessionRepository.findById(44L)).thenReturn(Optional.empty());
-        assertThrows(SessionNotFoundException.class, () -> service.logout(55, "android"));
+        when(redisRepository.findAllByUserId(1)).thenReturn(new ArrayList<>());
+        assertThrows(SessionNotFoundException.class, () -> service.logout(1, "a"));
     }
 
     @Test
-    void logout_closedSession() {
-        Session session = new Session();
-        session.setId(44L);
-        session.setUserId(55);
-        session.setDeviceInfo("android");
-        session.setIsActive(false);
-        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.of(44L));
-        when(sessionRepository.findById(44L)).thenReturn(Optional.of(session));
-
-        assertThrows(SessionsOperationsException.class, () -> service.logout(55, "android"));
-        verify(sessionRepository, never()).logout(anyLong());
-    }
-
-    @Test
-    void findFromRedis_found() {
-        Session session = new Session();
-        session.setId(100L);
-        when(redisRepository.findBySessionId(100L)).thenReturn(Optional.of(session));
-        Session found = service.findFromRedisById(100L);
-        assertEquals(100L, found.getId());
-    }
-
-    @Test
-    void findFromRedis_notFound() {
-        when(redisRepository.findBySessionId(101L)).thenReturn(Optional.empty());
-        assertThrows(SessionNotFoundException.class, () -> service.findFromRedisById(101L));
-    }
-
-    @Test
-    void deleteOldSessions() {
-        doNothing().when(sessionRepository).deleteOldSessions(any(LocalDateTime.class));
-        assertDoesNotThrow(() -> service.deleteOldSessions());
-        verify(sessionRepository, times(1)).deleteOldSessions(any(LocalDateTime.class));
+    void findAllSessionsByUserIdAndDeviceInfo() {
+        findAllByUserId();
+        try {
+            Method thisMethod = SessionTracingService.class.getDeclaredMethod("findAllSessionsByUserIdAndDeviceInfo", Integer.class, String.class);
+            thisMethod.setAccessible(true);
+            List<Session> result = (List<Session>) thisMethod.invoke(service, 1, "a");
+            assertEquals(2, result.size());
+            verify(redisRepository, times(1)).findAllByUserId(1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -193,17 +168,39 @@ class SessionTracingServiceTest {
     }
 
     @Test
-    void prolongSession_found() {
-        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.of(99L));
-        doNothing().when(redisRepository).prolongSession(99L);
-        service.prolongSession(55, "android");
-        verify(redisRepository, times(1)).prolongSession(99L);
+    void findFromRedisById_found() {
+        Session session = new Session();
+        session.setId(100L);
+        when(redisRepository.findBySessionId(100L)).thenReturn(Optional.of(session));
+        Session found = service.findFromRedisById(100L);
+        assertEquals(100L, found.getId());
     }
 
     @Test
-    void prolongSessionByUserId_notFound() {
-        when(sessionRepository.findSessionIdByUserIdAndDeviceInfo(55, "android")).thenReturn(Optional.empty());
-        assertThrows(SessionNotFoundException.class, () -> service.prolongSession(55, "android"));
+    void findFromRedisById_notFound() {
+        when(redisRepository.findBySessionId(101L)).thenReturn(Optional.empty());
+        assertThrows(SessionNotFoundException.class, () -> service.findFromRedisById(101L));
+    }
+
+    @Test
+    void prolongSession_found() {
+        findAllByUserId();
+        service.prolongSession(1, "a");
+        verify(redisRepository, times(1)).prolongSession(1L);
+        verify(redisRepository, times(1)).prolongSession(3L);
+    }
+
+    @Test
+    void prolongSession_notFound() {
+        when(redisRepository.findAllByUserId(1)).thenReturn(new ArrayList<>());
+        assertThrows(SessionNotFoundException.class, () -> service.prolongSession(1, "a"));
+    }
+
+    @Test
+    void deleteOldSessions() {
+        doNothing().when(sessionRepository).deleteOldSessions(any(LocalDateTime.class));
+        assertDoesNotThrow(() -> service.deleteOldSessions());
+        verify(sessionRepository, times(1)).deleteOldSessions(any(LocalDateTime.class));
     }
 
     @Test
@@ -216,5 +213,41 @@ class SessionTracingServiceTest {
 
         verify(redisRepository, times(1)).findAllKeys();
         verify(sessionRepository, times(1)).closeNotActiveSessions(Arrays.asList(1L, 2L));
+    }
+
+    @Test
+    void maskIp() {
+        try {
+            Method thisMethod = SessionTracingService.class.getDeclaredMethod("maskIp", String.class);
+            thisMethod.setAccessible(true);
+            String result = (String) thisMethod.invoke(service, "111.111.111.111");
+            assertEquals("111.1**.***.111", result);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void decode() {
+        Session session = new Session();
+        session.setDeviceInfo(Base64Service.encode("android"));
+        session.setIpAddress(Base64Service.encode("ipAddress"));
+        try {
+            Method thisMethod = SessionTracingService.class.getDeclaredMethod("decode", Session.class);
+            thisMethod.setAccessible(true);
+            Session result = (Session) thisMethod.invoke(service, session);
+            assertEquals("android", result.getDeviceInfo());
+            assertEquals("ipAddress", result.getIpAddress());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void findAllByUserId() {
+        List<Session> sessions = new ArrayList<>();
+        sessions.add(new Session(1L, 1, null, null, null, null, "YQ==", null));
+        sessions.add(new Session(2L, 1, null, null, null, null, "Yw==", null));
+        sessions.add(new Session(3L, 1, null, null, null, null, "YQ==", null));
+        when(redisRepository.findAllByUserId(1)).thenReturn(sessions);
     }
 }
