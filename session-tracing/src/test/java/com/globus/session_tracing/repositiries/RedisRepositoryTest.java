@@ -135,4 +135,18 @@ class RedisRepositoryTest {
         assertTrue(res);
         verify(redisTemplate, times(1)).delete("15");
     }
+
+    @Test
+    void findAllByUserId() {
+        Set<String> strings = Set.of("1", "2", "3");
+        Session session1 = new Session(1L, 1, null, null, null, null, null, null);
+        Session session2 = new Session(2L, 2, null, null, null, null, null, null);
+        Session session3 = new Session(3L, 1, null, null, null, null, null, null);
+        when(redisTemplate.keys("*")).thenReturn(strings);
+        when(redisTemplate.opsForValue().get("1")).thenReturn(session1);
+        when(redisTemplate.opsForValue().get("2")).thenReturn(session2);
+        when(redisTemplate.opsForValue().get("3")).thenReturn(session3);
+        List<Session> sessions = redisRepository.findAllByUserId(1);
+        assertEquals(2, sessions.size());
+    }
 }
