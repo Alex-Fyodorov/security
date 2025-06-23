@@ -1,9 +1,8 @@
-package com.globus.biometric_auth_service;
+package com.globus.biometric_auth_service.service;
 
 import com.globus.biometric_auth_service.exception.ResourceNotFoundException;
 import com.globus.biometric_auth_service.model.Device;
 import com.globus.biometric_auth_service.repository.DeviceRepository;
-import com.globus.biometric_auth_service.service.DeviceService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

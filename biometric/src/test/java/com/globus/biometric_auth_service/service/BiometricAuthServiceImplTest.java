@@ -1,4 +1,4 @@
-package com.globus.biometric_auth_service;
+package com.globus.biometric_auth_service.service;
 
 import com.globus.biometric_auth_service.dto.*;
 import com.globus.biometric_auth_service.exception.IllegalAuthStateException;
@@ -8,10 +8,6 @@ import com.globus.biometric_auth_service.model.BiometricSettings;
 import com.globus.biometric_auth_service.model.BiometryType;
 import com.globus.biometric_auth_service.model.Device;
 import com.globus.biometric_auth_service.repository.BiometricSettingsRepository;
-import com.globus.biometric_auth_service.service.DeviceService;
-import com.globus.biometric_auth_service.service.LoginManager;
-import com.globus.biometric_auth_service.service.OtpService;
-import com.globus.biometric_auth_service.service.SmsService;
 import com.globus.biometric_auth_service.service.impl.BiometricAuthServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
