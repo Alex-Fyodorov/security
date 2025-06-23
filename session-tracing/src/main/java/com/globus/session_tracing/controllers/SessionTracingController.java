@@ -1,5 +1,6 @@
 package com.globus.session_tracing.controllers;
 
+
 import com.globus.session_tracing.converters.SessionConverter;
 import com.globus.session_tracing.dtos.SessionDto;
 import com.globus.session_tracing.entities.Session;
@@ -13,6 +14,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+//import org.apache.logging.log4j.LogManager;
+//import org.apache.logging.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +35,8 @@ public class SessionTracingController {
     private final SessionTracingService sessionTracingService;
     private final SessionConverter sessionConverter;
     private final SessionValidator sessionValidator;
+
+    Logger logger = LoggerFactory.getLogger(SessionTracingController.class);
 
     @GetMapping
     @Operation(summary = "Запрос на получение страницы с сессиями",
@@ -68,6 +77,7 @@ public class SessionTracingController {
             })
     public SessionDto findById(@PathVariable @Parameter(
             description = "Идентификатор сессии", required = true) long id) {
+        logger.info("===== Anything =====");
         return sessionConverter.toDto(sessionTracingService.findBySessionId(id));
     }
 
