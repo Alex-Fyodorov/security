@@ -1,6 +1,5 @@
 package com.globus.session_tracing.services;
 
-import com.globus.session_tracing.controllers.SessionTracingController;
 import com.globus.session_tracing.entities.Session;
 import com.globus.session_tracing.exceptions.SessionNotFoundException;
 import com.globus.session_tracing.exceptions.TooManySessionsException;
@@ -10,7 +9,6 @@ import com.globus.session_tracing.repositiries.specifications.SessionSpecificati
 import com.globus.session_tracing.utils.Base64Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,8 +27,7 @@ import java.util.List;
 public class SessionTracingService {
     private final SessionRepository sessionRepository;
     private final RedisRepository redisRepository;
-
-    Logger log = LoggerFactory.getLogger(SessionTracingController.class);
+    private final Logger log = LoggerFactory.getLogger(SessionTracingService.class);
 
     @Value("${sessions.page.quantity}")
     private int pageSize;

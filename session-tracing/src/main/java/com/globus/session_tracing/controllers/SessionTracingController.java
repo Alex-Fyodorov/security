@@ -30,8 +30,7 @@ public class SessionTracingController {
     private final SessionTracingService sessionTracingService;
     private final SessionConverter sessionConverter;
     private final SessionValidator sessionValidator;
-
-    Logger logger = LoggerFactory.getLogger(SessionTracingController.class);
+    private final Logger log = LoggerFactory.getLogger(SessionTracingController.class);
 
     @GetMapping
     @Operation(summary = "Запрос на получение страницы с сессиями",

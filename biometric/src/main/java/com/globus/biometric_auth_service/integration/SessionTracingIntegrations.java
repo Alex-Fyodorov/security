@@ -3,7 +3,6 @@ package com.globus.biometric_auth_service.integration;
 import com.globus.biometric_auth_service.dto.SessionDto;
 import com.globus.biometric_auth_service.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.InternalException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -15,7 +14,6 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 @Component
-@Slf4j
 @RequiredArgsConstructor
 public class SessionTracingIntegrations {
     private final WebClient sessionTracingServiceWebClient;
@@ -67,12 +65,10 @@ public class SessionTracingIntegrations {
                 .toEntity(Map.class)
                 .map(response -> {
                     if (response.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
-                        log.info("not found");
                         return new ResourceNotFoundException(
                                 response.getBody().get("message").toString());
                     }
                     if (response.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
-                        log.info("bab request");
                         return new IllegalArgumentException(
                                 response.getBody().get("message").toString());
                     }

@@ -1,9 +1,10 @@
 package com.globus.biometric_auth_service.aspect;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -16,8 +17,8 @@ import java.util.stream.Collectors;
 
 @Aspect
 @Component
-@Slf4j
 public class LoggingAspect {
+    private final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
 
     @Pointcut(value = "execution(public * com.pm.biometric_auth_service.controller.*Controller.*(..))")
     public void controllerPointcut() {
