@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +30,8 @@ public class SessionTracingController {
     private final SessionTracingService sessionTracingService;
     private final SessionConverter sessionConverter;
     private final SessionValidator sessionValidator;
+
+    Logger logger = LoggerFactory.getLogger(SessionTracingController.class);
 
     @GetMapping
     @Operation(summary = "Запрос на получение страницы с сессиями",
@@ -173,5 +177,4 @@ public class SessionTracingController {
                                description = "Информация об устройстве", required = true) String deviceInfo) {
         sessionTracingService.logout(userId, deviceInfo);
     }
-
 }

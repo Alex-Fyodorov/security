@@ -1,14 +1,16 @@
 package com.globus.session_tracing.exceptions;
 
-import lombok.extern.slf4j.Slf4j;
+import com.globus.session_tracing.controllers.SessionTracingController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-@Slf4j
 public class GlobalExceptionHandler {
+    Logger log = LoggerFactory.getLogger(SessionTracingController.class);
 
     @ExceptionHandler
     public ResponseEntity<AppError> catchSessionNotFoundException(SessionNotFoundException exception) {
