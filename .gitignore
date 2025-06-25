@@ -35,3 +35,6 @@ build/
 ### Logs ###
 session-tracing/logs/
 biometric/logs/
+logging-of-suspicious-activity/logs/
+logging-of-suspicious-activity/log/
+log/
