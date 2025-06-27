@@ -17,7 +17,6 @@
 	<modules>
 		<module>front-emulator</module>
 		<module>biometric</module>
-		<module>logging-of-suspicious-activity</module>
 		<module>session-tracing</module>
 	</modules>
 </project>
